@@ -2,76 +2,31 @@ INCLUDE "constants.inc"
 
 SECTION "Input", ROM0
 
-; Runs the input sequence
-input::
-    call read_input
-    call decode_input
+read_pad:
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
     ret
 
-; Checks the Joypad for inputs
-read_input:
-    ld [rJOYP], a   ;; Seleccionar botones
-    ld a, [rJOYP]   ;; Leo el estado de los botones
-    ld a, [rJOYP]   ;; Se repite para perder tiempo para dar tiempo a actualizar (motivo electronico)
-    ld a, [rJOYP]   ;; Se repite para perder tiempo para dar tiempo a actualizar (motivo electronico)
+get_pad_input::
+    ; Read the D-PAD
+    ld a, P1F_GET_DPAD
+    call read_pad
+
+    ; Put the D-PAD input into (b)'s high nibble
+    swap a      ; Ex. 1111 1011 -> 1011 1111
+    and a, $F0  ; Ex. 1011 1111 and 1111 0000 -> 1011 0000
+    ld b, a     ; Ex. 1011 0000
+
+    ; Read the buttons
+    ld a, P1F_GET_BTN
+    call read_pad
+
+    ; Merge the buttons' input into (b)'s low nibble
+    and a, $0F  ; Ex. 1111 1110 and 0000 1111 -> 0000 1110
+    or a, b     ; Ex. 1011 0000 or 0000 1110 -> 1011 1110
+    ld b, a; Ex. (D-PAD) -> 1011, (BTN) -> 1110
+
     ret
 
-; Determines if the input comes from the D-PAD or the Buttons
-decode_input:
-    bit 4, a
-    call z, decode_dpad
-    ret
-    bit 5, a
-    call z, decode_butt
-    ret
-
-; TODO
-; Decodes Buttons inputs and converts them into actions
-decode_butt:
-    .right:
-        bit 0, a
-        jr nz, .left
-        ; jp move_right
-        ret
-    .left:
-        bit 1, a
-        jr nz, .up
-        ; jp move_left
-        ret
-    .up:
-        bit 2, a
-        jr nz, .down
-        ; jp move_up
-        ret
-    .down:
-        bit 3, a
-        jr nz, .exit
-        ; jp move_down
-        ret
-    .exit:
-    ret
-
-; Decodes D-PAD inputs and converts them into actions
-decode_dpad:
-    .right:
-        bit 0, a
-        jr nz, .left
-        jp move_right
-        jp gravity
-    .left:
-        bit 1, a
-        jr nz, .up
-        jp move_left
-        jp gravity
-    .up:
-        bit 2, a
-        jr nz, .down
-        jp move_up
-    .down:
-        bit 3, a
-        jr nz, .exit
-        jp move_down
-        jp gravity
-    .exit:
-        jp gravity
-    ret
