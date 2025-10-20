@@ -1,13 +1,13 @@
-INCLUDE "constants.inc"
+include "constants.inc"
 
-SECTION "Input", ROM0
+section "Input", ROM0
 
 read_pad:
     ldh [rP1], a
     ldh a, [rP1]
     ldh a, [rP1]
     ldh a, [rP1]
-    ret
+ret
 
 get_pad_input::
     ; Read the D-PAD
@@ -27,6 +27,5 @@ get_pad_input::
     and a, $0F  ; Ex. 1111 1110 and 0000 1111 -> 0000 1110
     or a, b     ; Ex. 1011 0000 or 0000 1110 -> 1011 1110
     ld b, a; Ex. (D-PAD) -> 1011, (BTN) -> 1110
-
-    ret
+ret
 

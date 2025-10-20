@@ -16,11 +16,11 @@
 ;;-------------------------------------------------------------------------------------------------------------------------------;;
 
 ;; You may include hardware.inc if you wanted to use its definitions
-;; INCLUDE "hardware.inc"
+;; include "hardware.inc"
 ;;    rev_Check_hardware_inc 4.0
 
 ;; See Pan Docs for reference ( https://gbdev.io/pandocs/The_Cartridge_Header.html )
-SECTION "Header", ROM0[$100]
+section "Header", ROM0[$100]
    ;;--------------------------------------
    ;;-- Entry Point ($0100-$0103. 4 bytes)
    nop     ;; [1 byte ] Do nothing, just take 1 byte of space to complete de 4 bytes
