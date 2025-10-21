@@ -3,11 +3,30 @@ include "constants.inc"
 section "Tools", ROM0
 
 wait_vblank::
+    push hl
     ld hl, rLY
     ld a, VBLANK_START_LINE
     .vblank_loop:
         cp [hl]
         jr nz, .vblank_loop
+    pop hl
+ret
+
+; Check if in vblank, wait if not until vblank
+check_vblank::
+    push hl
+    ld hl, rLY
+    ld a, VBLANK_START_LINE
+    cp [hl]
+    jr c, .in_vblank
+    
+    ; Esperar hasta vblank
+    .wait_loop:
+        cp [hl]
+        jr nz, .wait_loop
+    
+    .in_vblank:
+        pop hl
 ret
 
 ; INPUT
@@ -27,6 +46,36 @@ memcpy256::
         inc de
         dec b
         jr nz, .loop
+ret
+
+; INPUT
+;   hl: source
+;   de: destination
+;   bc: bytes
+memcpy65536::
+    ; Check if 0
+    ld a, c
+    or b
+    ret z
+
+    ; Loop
+    .loop:
+        call check_vblank
+
+        ld a, [hl+]
+        ld [de], a
+        inc de
+        
+        dec c
+        jr nz, .loop
+        
+        ld a, c ; Check if 0
+        or b
+        ret z
+
+        dec c
+        dec b
+    jr .loop
 ret
 
 ; INPUT

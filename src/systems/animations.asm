@@ -21,26 +21,26 @@ ret
 set_jumping_sprite:
     ; Checks if sprite is already set
     ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp $20
+    cp LEFT_PENGUIN_TILE_JUMPING
     ret z
 
     ; Set sprite
-    ld a, $20
+    ld a, LEFT_PENGUIN_TILE_JUMPING
     ld [LEFT_PENGUIN_TILE_INDEX], a
-    ld a, $22
+    ld a, RIGHT_PENGUIN_TILE_JUMPING
     ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
 set_idle_sprite:
     ; Checks if sprite is already set
     ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp $1C
+    cp LEFT_PENGUIN_TILE_IDLE
     ret z
 
     ; Set sprite
-    ld a, $1C
+    ld a, LEFT_PENGUIN_TILE_IDLE
     ld [LEFT_PENGUIN_TILE_INDEX], a
-    ld a, $1E
+    ld a, RIGHT_PENGUIN_TILE_IDLE
     ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
@@ -51,7 +51,7 @@ flying_animation:
 
     ; Check if sprite is already set
     ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp $1C
+    cp LEFT_PENGUIN_TILE_IDLE
     jr z, .set_jumping_sprite
 
     .set_idle_sprite:

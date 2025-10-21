@@ -1,5 +1,6 @@
 section "Entities Assets", ROM0
 
+entities_tiles::
 normal_penguin::
     db $0F,$0F,$10,$11,$0D,$12,$1F,$00,$1F,$05,$1F,$0F,$1F,$06,$3F,$20
     db $5F,$60,$9F,$E0,$7F,$60,$0F,$10,$0F,$10,$17,$18,$1B,$1C,$38,$38

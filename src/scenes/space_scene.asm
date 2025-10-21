@@ -5,8 +5,8 @@ section "Space Scene Sprites", rom0
 penguin_entity:
     ; Sprite cmp (+0)
     ; y, x, tile, properties
-    db 32,24,$1C,0
-    db 32,32,$1E,0
+    db 32,24,LEFT_PENGUIN_TILE_IDLE,0
+    db 32,32,LEFT_PENGUIN_TILE_JUMPING,0
     ; Physics cmp (+8)
     ; y, x, vy, vx
     db 32,24,0,0
@@ -23,7 +23,8 @@ space_scene_init::
     call animations_init
     ; Load penguin tiles into VRAM
     call wait_vblank
-    call load_penguin_tiles
+    call load_entities_tiles
+    call load_background_tiles
     ; Clear OAM and enable sprites
     call wait_vblank
     call clear_oam
@@ -52,19 +53,21 @@ man_entity_draw:
 ret
 
 ; TODO without magic numbers
-load_penguin_tiles:
+load_entities_tiles::
     ; Left penguin tiles
     call wait_vblank
-    ld hl, normal_penguin
-    ld de, $81C0
-    ld b, 64
-    call memcpy256
-    ; Right penguin tiles
+    ld hl, entities_tiles
+    ld de, $8020
+    ld bc, 418
+    call memcpy65536
+ret
+
+; Call this after load entities tiles, reuse de register
+load_background_tiles::
     call wait_vblank
-    ld hl, jumping_penguin
-    ld de, $8200
-    ld b, 64
-    call memcpy256
+    ld hl, background_tiles
+    ld bc, 1572
+    call memcpy65536
 ret
 
 entities_init::
