@@ -57,20 +57,21 @@ ret
 man_entity_for_each::
     ld de, components
     .loop:
-    .check_sentinel:
+        ; check_sentinel:
         ld a, [de]
         cp CMP_SENTINEL
         ret z
-    .process:
+        ; process:
         push de
         push hl
         call helper_call_hl
-    .return:
+        ; return:
         pop hl
         pop de
-    .next:
+        ; next:
         ld a, e
         add SIZEOF_INFO_CMP
+        ld e, a
     jr .loop
 ret
 
@@ -92,4 +93,38 @@ zero_all_sprite_components::
     ld b, SIZEOF_ARRAY_CMP
     xor a
     call memset256
+ret
+
+; INPUT
+;   hl -> Process routine address
+;   bc -> Main entity to compare with
+man_entity_for_one_for_each::
+    ld de, cmp_sprite
+    .loop:
+        ; check_sentinel:
+        ld a, [de]
+        cp CMP_SENTINEL
+        ret z
+        ; check bc != de
+        call cp_bc_de
+        jr z, .next
+        ; process:
+        push de
+        push hl
+        call helper_call_hl
+        ; return:
+        pop hl
+        pop de
+        .next:
+            ld a, e
+            add SIZEOF_INFO_CMP
+            ld e, a
+    jr .loop
+ret
+
+check_colliding_entities::
+    ld hl, are_boxes_colliding
+    ld b, CMP_SPRITE_H
+    ld c, 0
+    call man_entity_for_one_for_each
 ret

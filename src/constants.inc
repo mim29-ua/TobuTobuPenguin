@@ -6,7 +6,9 @@ def P1F_GET_NONE equ 0
 def ANIMATION_SPEED equ 10
 def VBLANK_START_LINE equ $90
 def VRAM_TILE_SIZE equ $10
+def TMAP_LINE_SIZE equ $20
 def PENGUIN_METASPRITE_SIZE equ 4
+def METASPRITE_DIMENSIONS equ 16 
 
 ; ---------------------------------------------------
 ; JOYPAD

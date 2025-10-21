@@ -135,3 +135,21 @@ ret
 
 helper_call_hl::
     jp hl
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 📥 INPUT:
+;; bc
+;; de
+;; 🔙 OUTPUT:
+;; Z  flag: bc == de
+;; NZ flag: bc != de
+cp_bc_de::
+    ; cp b and d
+    ld a, b
+    cp d
+    ret nz
+
+    ; cp c and e
+    ld a, c
+    cp e
+ret

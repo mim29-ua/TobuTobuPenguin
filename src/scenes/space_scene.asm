@@ -42,6 +42,7 @@ space_scene_run::
     call get_pad_input ; Returns b, don't touch it
     call move ; Uses b
     call animate ; Uses b
+    call check_colliding_entities
 jr space_scene_run
 
 ; Copy entities sprites to OAM
