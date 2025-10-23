@@ -1,16 +1,27 @@
 include "constants.inc"
-include "man/man_entity.inc"
 
-section "Space Scene Sprites", rom0
+section "Space Scene Entities", rom0
+
 penguin_entity:
     ; Sprite cmp (+0)
     ; y, x, tile, properties
-    db 32,24,LEFT_PENGUIN_TILE_IDLE,0
-    db 32,32,LEFT_PENGUIN_TILE_JUMPING,0
+    db 16,8,LEFT_PENGUIN_TILE_IDLE,0
+    db 16,16,RIGHT_PENGUIN_TILE_IDLE,0
     ; Physics cmp (+8)
     ; y, x, vy, vx
-    db 32,24,0,0
-    db 32,32,0,0
+    db 0,0,0,0
+    db 0,0,0,0
+
+enemy_test_entity:
+    ; Sprite cmp (+0)
+    ; y, x, tile, properties
+    db 144,56,$14,0
+    db 144,64,$16,0
+    ; Physics cmp (+8)
+    ; y, x, vy, vx
+    db 0,0,0,0
+    db 0,0,0,0
+
 section "Space Scene", ROM0
 
 space_scene_init::
@@ -42,12 +53,11 @@ space_scene_run::
     call get_pad_input ; Returns b, don't touch it
     call move ; Uses b
     call animate ; Uses b
-    call check_colliding_entities
 jr space_scene_run
 
 ; Copy entities sprites to OAM
 man_entity_draw:
-    ld hl, cmp_sprite
+    ld hl, sprite_cmps_start
     ld de, OAM_START
     ld b, SIZEOF_ARRAY_CMP
     call memcpy256
@@ -84,6 +94,21 @@ entities_init::
     ld d, CMP_PHYSICS_H
     ld e, l
     ld hl, (penguin_entity + SIZEOF_SPRI_CMP)
+    ld b, SIZEOF_PHYS_CMP
+    call memcpy256
+
+    ; Init test enemy sprinte cmp
+    call man_entity_alloc
+    ld d, CMP_SPRITE_H
+    ld e, l
+    ld hl, (enemy_test_entity + 0)
+    ld b, SIZEOF_SPRI_CMP
+    call memcpy256
+    ; Init test enemy physics cmp
+    ; call man_entity_alloc
+    ld d, CMP_PHYSICS_H
+    ld e, l
+    ld hl, (enemy_test_entity + SIZEOF_SPRI_CMP)
     ld b, SIZEOF_PHYS_CMP
     call memcpy256
 ret
