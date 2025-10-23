@@ -1,5 +1,6 @@
 include "constants.inc"
-include "man/man_entity.inc"
+
+section "Space Scene Entities", rom0
 
 section "Space Scene", ROM0
 
@@ -39,12 +40,11 @@ space_scene_run::
     call get_pad_input ; Returns b, don't touch it
     call move ; Uses b
     call animate ; Uses b
-    call check_colliding_entities
 jr space_scene_run
 
 ; Copy entities sprites to OAM
 man_entity_draw:
-    ld hl, cmp_sprite
+    ld hl, sprite_cmps_start
     ld de, OAM_START
     ld b, SIZEOF_ARRAY_CMP
     call memcpy256
@@ -264,7 +264,6 @@ penguin_entity_init::
     ld b, SIZEOF_SPRI_CMP
     call memcpy256
     ; Init penguin physics cmp
-    ; call man_entity_alloc
     ld d, CMP_PHYSICS_H
     ld e, l
     ld hl, (penguin_entity + SIZEOF_SPRI_CMP)

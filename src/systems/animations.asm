@@ -12,9 +12,11 @@ animations_init::
 ret
 
 animate::
-    bit PADB_UP, b
+    ld a, [last_input]
+    bit PADB_UP, a
     call z, flying_animation
-    bit PADB_UP, b
+    ld a, [last_input]
+    bit PADB_UP, a
     call nz, set_jumping_sprite
 ret
 

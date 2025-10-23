@@ -1,26 +1,49 @@
 include "constants.inc"
-include "man/man_entity.inc"
 
 section "Movement", ROM0
 
-; Movement works by updating the CMP_SPRI 
-; coordinates according to the DPAD inputs
+;; Movement works by updating the CMP_SPRI 
+;; coordinates according to the DPAD inputs
 
+;; move -> check_movement -> movement
+
+;; INPUT:
+;;      b -> DPAD input, 0 == pressed
 move::
     ; Decode D-PAD input
-    bit PADB_DOWN, b
-    call z, move_down
-    bit PADB_UP, b
-    call z, move_up
-    bit PADB_LEFT, b
-    call z, move_left
-    bit PADB_RIGHT, b
-    call z, move_right
+    ld a, [last_input]
+    bit PADB_DOWN, a
+    call z, check_move_down
+    ld a, [last_input]
+    bit PADB_UP, a
+    call z, check_move_up
+    ld a, [last_input]
+    bit PADB_LEFT, a
+    call z, check_move_left
+    ld a, [last_input]
+    bit PADB_RIGHT, a
+    call z, check_move_right
 
     ; Gravity (not applies if UP pressed)
-    bit PADB_UP, b
+    ld a, [last_input]
+    bit PADB_UP, a
     ret z
-    call move_down
+    call check_move_down
+ret
+
+;; MOVE RIGHT
+
+check_move_right:
+    ; Check other entities collision
+    ld a, RIGHT
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, dead
+
+    ; Check wall collision
+    ld a, [LEFT_PENGUIN_X]
+    cp RIGHT_WALL_PIXEL
+    call nz, move_right
 ret
 
 move_right:
@@ -31,6 +54,33 @@ move_right:
     inc [hl]
 ret
 
+;; MOVE LEFT
+
+dead:
+    ld hl, $C103
+    set 6, [hl]
+    ld hl, $C107
+    set 6, [hl]
+    call wait_vblank
+    call man_entity_draw
+    call wait_vblank
+    di
+    halt
+ret
+
+check_move_left:
+    ; Check other entities collision
+    ld a, LEFT
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, dead
+
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_X]
+    cp LEFT_WALL_PIXEL
+    call nz, move_left
+ret
+
 move_left:
     ld h, CMP_SPRITE_H
     ld l, CMP_SPRI_L_X
@@ -39,12 +89,42 @@ move_left:
     dec [hl]
 ret
 
+;; MOVE DOWN
+
+check_move_down:
+    ; Check other entities collision
+    ld a, DOWN
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    ret c
+
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp DOWN_WALL_PIXEL
+    call nz, move_down
+ret
+
 move_down:
     ld h, CMP_SPRITE_H
     ld l, CMP_SPRI_L_Y
     inc [hl]
     ld l, CMP_SPRI_R_Y
     inc [hl]
+ret
+
+;; MOVE UP
+
+check_move_up:
+    ; Check other entities collision
+    ld a, UP
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, dead
+
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp UP_WALL_PIXEL
+    call nz, move_up
 ret
 
 move_up:

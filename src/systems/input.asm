@@ -1,5 +1,15 @@
 include "constants.inc"
 
+section "Input Variables", WRAM0
+
+last_input: ds 1
+
+; 0 -> Down
+; 1 -> Up
+; 2 -> Left
+; 3 -> Right
+actual_movement: ds 1
+
 section "Input", ROM0
 
 read_pad:
@@ -26,6 +36,7 @@ get_pad_input::
     ; Merge the buttons' input into (b)'s low nibble
     and a, $0F  ; Ex. 1111 1110 and 0000 1111 -> 0000 1110
     or a, b     ; Ex. 1011 0000 or 0000 1110 -> 1011 1110
-    ld b, a; Ex. (D-PAD) -> 1011, (BTN) -> 1110
+    ld b, a     ; Ex. (D-PAD) -> 1011, (BTN) -> 1110
+    ld [last_input], a
 ret
 
