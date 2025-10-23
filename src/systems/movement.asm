@@ -48,6 +48,7 @@ move_down:
 ret
 
 move_up:
+    call move_background
     ld h, CMP_SPRITE_H
     ld l, CMP_SPRI_L_Y
     dec [hl]

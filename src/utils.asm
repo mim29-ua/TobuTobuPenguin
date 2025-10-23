@@ -12,6 +12,57 @@ wait_vblank::
     pop hl
 ret
 
+move_background::
+    ld hl, BACKGROUND_VIEWPORT_Y_ADDR
+    ld a, [hl]
+    cp 0
+
+    jr z, .change_tilemap ; Reduce only if not at top
+        dec [hl]
+        ret
+
+    .change_tilemap:
+
+        ld hl, rLCDC
+        bit 3, [hl]
+        
+        jr nz, .change_maps
+        call change_vram_tilemap
+        ret
+
+        .change_maps:
+            ld a, %10110100
+            call set_palettes_47_48
+            call lcd_off
+                call print_finals_map
+                call change_vram_tilemap
+            call lcd_on
+ret
+
+change_vram_tilemap::
+    call change_window_map
+    call move_background_window_bottom
+ret
+
+; Move the background window down to bottom position
+move_background_window_bottom::
+    ld a, 111
+    ld [BACKGROUND_VIEWPORT_Y_ADDR], a
+ret
+
+change_window_map::
+    ld a, %00001000
+    xor [hl]
+    ld [hl], a
+ret
+
+; Returns a random x-position
+random_position:
+    ld a, [$FF04]
+    srl a
+    add 9
+ret
+
 ; Check if in vblank, wait if not until vblank
 check_vblank::
     push hl
@@ -60,7 +111,6 @@ memcpy65536::
 
     ; Loop
     .loop:
-        call check_vblank
 
         ld a, [hl+]
         ld [de], a
@@ -96,6 +146,12 @@ lcd_off::
     ei 
 ret
 
+lcd_on::
+    ld hl, rLCDC
+    ld a, $97
+    ld [hl], a
+ret
+
 clear_oam::
     ld hl, OAM_START
     ld b, 160 ; Until $FE9F
@@ -110,6 +166,11 @@ set_palettes::
     ld [$FF47], a
     ld [$FF48], a
     ld [$FF49], a
+ret
+
+set_palettes_47_48::
+    ld [$FF47], a
+    ld [$FF48], a
 ret
 
 enable_sprites::

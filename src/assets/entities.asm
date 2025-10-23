@@ -1,3 +1,48 @@
+include "constants.inc"
+
+section "Sprites creation configurations", rom0
+; Sprite cmp (+0)
+; y, x, tile, properties (Enemies don't use static x, they use a random x position. And y is always zero when created.)
+
+; Physics cmp (+8)
+; y, x, vy, vx
+
+penguin_entity:
+    db 32,24,LEFT_PENGUIN_TILE_IDLE,0
+    db 32,32,LEFT_PENGUIN_TILE_JUMPING,0
+    db 32,24,0,0
+    db 32,32,0,0
+
+ovni_entity:
+    db $18, 0
+    db $18, %00100000
+    db 0,0
+    db 0,0
+
+airship_entity:
+    db $08, 0
+    db $0A, 0
+    db 0,0
+    db 0,0
+
+ghost_entity:
+    db $0C, 0
+    db $0E, 0
+    db 0,0
+    db 0,0
+
+owl_entity:
+    db $1A, 0
+    db $1A, %00100000
+    db 0,0
+    db 0,0
+
+windmill_entity:
+    db $1E, 0
+    db $1E, %00100000
+    db 0,0
+    db 0,0
+
 section "Entities Assets", ROM0
 
 entities_tiles::
@@ -48,3 +93,19 @@ ovni_3::
 ovni_4::
     db $03,$03,$04,$07,$0B,$0C,$17,$18,$1F,$1F,$67,$78,$9F,$E0,$FF,$FF
     db $23,$3C,$1F,$1F,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+owl_1:
+    db $00, $00, $0E, $0E, $11, $1F, $17, $11, $1B, $10, $1B, $10, $2F, $31, $41, $7F
+    db $80, $FF, $88, $FF, $8C, $FF, $9F, $FB, $97, $F5, $42, $72, $40, $60, $20, $20
+
+owl_2:
+    db $80, $80, $6E, $EE, $31, $FF, $1E, $F1, $1B, $F0, $9B, $F0, $8F, $F1, $81, $FF
+    db $80, $FF, $88, $FF, $6C, $7F, $1F, $1B, $07, $05, $02, $02, $00, $00, $00, $00
+
+windmill_1:
+    db $00, $00, $00, $00, $01, $01, $63, $63, $75, $57, $79, $4F, $3D, $27, $3F, $23
+    db $3F, $3F, $11, $1F, $0B, $0E, $07, $04, $0F, $08, $1F, $13, $1C, $1C, $00, $00
+
+windmill_2:
+    db $03, $03, $07, $05, $0F, $09, $0F, $11, $1F, $19, $17, $1D, $13, $1F, $11, $1F
+    db $FF, $FF, $FE, $83, $7C, $47, $38, $2F, $1F, $1F, $00, $00, $00, $00, $00, $00
