@@ -1,16 +1,6 @@
 include "constants.inc"
 include "man/man_entity.inc"
 
-section "Space Scene Sprites", rom0
-penguin_entity:
-    ; Sprite cmp (+0)
-    ; y, x, tile, properties
-    db 32,24,LEFT_PENGUIN_TILE_IDLE,0
-    db 32,32,LEFT_PENGUIN_TILE_JUMPING,0
-    ; Physics cmp (+8)
-    ; y, x, vy, vx
-    db 32,24,0,0
-    db 32,32,0,0
 section "Space Scene", ROM0
 
 space_scene_init::
@@ -21,18 +11,25 @@ space_scene_init::
     ; Load animations variables
     call wait_vblank
     call animations_init
-    ; Load penguin tiles into VRAM
-    call wait_vblank
+
+    call lcd_off
+
+    ; Load tiles into VRAM
     call load_entities_tiles
     call load_background_tiles
+    call load_ui_tiles
+
+    call print_initials_maps
+    call move_background_window_bottom
+
     ; Clear OAM and enable sprites
-    call wait_vblank
     call clear_oam
     call enable_sprites
+    call load_ui_sprites
 
     ; Load entities
-    call wait_vblank
-    call entities_init
+    call penguin_entity_init
+    call lcd_on
 ret
 
 ; Scene/Game loop
@@ -52,25 +49,212 @@ man_entity_draw:
     call memcpy256
 ret
 
-; TODO without magic numbers
+;; -------------------------------------------------
+;  TILES
+
 load_entities_tiles::
-    ; Left penguin tiles
-    call wait_vblank
     ld hl, entities_tiles
-    ld de, $8020
-    ld bc, 418
+    ld de, $8000
+    ld bc, 546
     call memcpy65536
 ret
 
-; Call this after load entities tiles, reuse de register
 load_background_tiles::
-    call wait_vblank
     ld hl, background_tiles
-    ld bc, 1572
+    ld de, $8220
+    ld bc, 1574
     call memcpy65536
 ret
 
-entities_init::
+load_ui_tiles::
+    ld hl, ui_tiles
+    ld de, $8840
+    ld bc, 38 * 16
+    call memcpy65536
+
+;; -------------------------------------------------
+;  MAPS
+
+print_initials_maps::
+    call print_first_map
+    call print_second_map
+ret
+
+print_finals_map::
+    call print_third_map
+ret
+
+print_first_map::
+    ld hl, TMAP0
+    ld de, primer_tilemap
+    ld bc, MAP_DIMENSION * MAP_DIMENSION
+
+    call print_map
+ret
+
+print_second_map::
+    ld hl, TMAP1
+    ld de, segundo_tilemap
+    ld bc, MAP_DIMENSION * MAP_DIMENSION
+
+    call print_map
+ret
+
+print_third_map::
+    ld hl, TMAP0
+    ld de, tercer_tilemap
+    ld bc, MAP_DIMENSION * MAP_DIMENSION
+
+    call print_map
+ret
+
+; Input
+;
+; hl -> VRAM direction where copy the map
+; de -> Source address
+; bc -> Bytes number
+;
+print_map::
+    .print_map_loop:
+        ld a, [de]
+        inc de
+
+        ld [hl+], a
+
+        dec bc
+        ld a, c
+        or b
+        jr nz, .print_map_loop
+ret
+
+;; -------------------------------------------------
+;  ENEMIES
+
+generate_random_enemy:
+    ld a, [$FF04]
+    and $0F
+
+    .loop::
+        cp ENEMIES_TYPES_NUMBER
+        jr c, .end
+        sub ENEMIES_TYPES_NUMBER
+        jr .loop
+    .end
+
+    cp 0
+    jr z, .ovni_enemy
+
+    cp 1
+    jr z, .airship_enemy
+
+    cp 2
+    jr z, .ghost_enemy
+
+    cp 3
+    jr z, .owl_enemy
+
+    cp 4
+    jr z, .windmill_enemy
+
+    ret
+
+    .ovni_enemy
+        ld bc, ovni_entity
+        jr .continue
+
+    .airship_enemy
+        ld bc, airship_entity
+        jr .continue
+
+    .ghost_enemy
+        ld bc, ghost_entity
+        jr .continue
+
+    .owl_enemy
+        ld bc, owl_entity
+        jr .continue
+    
+    .windmill_enemy
+        ld bc, windmill_entity
+        jr .continue
+
+    .continue
+        call generate_enemy
+    
+ret
+
+; Generate a new enemy
+;
+; Input
+; bc -> enemy config address
+generate_enemy:
+
+    call man_entity_alloc
+    
+    ; Sprite component
+    
+    ld h, CMP_SPRITE_H    ; Man-entity destination address
+    
+    ld a, $20
+    ld [hl+], a            ; y position
+
+    call random_position
+    ld [hl+], a
+    ld d, a                ; x position
+
+    ld e, SIZEOF_SPRI_CMP  ; Tile and properties
+    sra e
+    dec e
+    dec e
+    .loop_sprite_left:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_sprite_left
+
+    ld a, $20
+    ld [hl+], a
+
+    ld a, d
+    add 8
+    ld [hl+], a             ; x position (again, for right sprite)
+
+    ld e, SIZEOF_SPRI_CMP   ; Tile and properties
+    sra e
+    dec e
+    dec e
+    .loop_sprite_right:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_sprite_right
+
+    ;; Physics component
+
+    ld h, CMP_PHYSICS_H
+
+    ld a, $20
+    ld [hl+], a             ; y position
+
+    ld a, d
+    ld [hl+], a             ; x position
+
+    ld e, SIZEOF_PHYS_CMP   ; vy and vx
+    dec e
+    dec e
+    .loop_physics:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_physics
+
+;; -------------------------------------------------
+;  ENTITIES
+
+penguin_entity_init::
     ; Init penguin sprite cmp
     call man_entity_alloc
     ld d, CMP_SPRITE_H

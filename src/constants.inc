@@ -9,6 +9,19 @@ def VRAM_TILE_SIZE equ $10
 def PENGUIN_METASPRITE_SIZE equ 4
 
 ; ---------------------------------------------------
+; BACKGROUND
+
+def MAP_DIMENSION equ 32
+def BACKGROUND_VIEWPORT_Y_ADDR equ $FF42
+def TILE_ROW_19_ADDR equ $9A40
+
+; ---------------------------------------------------
+; ENEMIES
+
+def ENEMIES_TYPES_NUMBER equ 5
+def RANDOM_CLOCK_ADDR equ $FF04
+
+; ---------------------------------------------------
 ; JOYPAD
 
 def P1F_GET_DPAD equ %00100000
@@ -38,15 +51,15 @@ def OAM_START equ $FE00
 def LEFT_PENGUIN_Y equ $FE00
 def LEFT_PENGUIN_X equ $FE01
 def LEFT_PENGUIN_TILE_INDEX equ $C102
-def LEFT_PENGUIN_TILE_IDLE equ $02
-def LEFT_PENGUIN_TILE_JUMPING equ $06
+def LEFT_PENGUIN_TILE_IDLE equ $00
+def LEFT_PENGUIN_TILE_JUMPING equ $04
 def LEFT_PENGUIN_ATRS equ $FE03
 
 def RIGHT_PENGUIN_Y equ $FE04
 def RIGHT_PENGUIN_X equ $FE05
 def RIGHT_PENGUIN_TILE_INDEX equ $C106
-def RIGHT_PENGUIN_TILE_IDLE equ $04
-def RIGHT_PENGUIN_TILE_JUMPING equ $08
+def RIGHT_PENGUIN_TILE_IDLE equ $02
+def RIGHT_PENGUIN_TILE_JUMPING equ $06
 def RIGHT_PENGUIN_ATRS equ $FE07
 
 ; ---------------------------------------------------
