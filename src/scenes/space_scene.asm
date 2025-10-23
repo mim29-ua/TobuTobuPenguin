@@ -12,16 +12,6 @@ penguin_entity:
     db 0,0,0,0
     db 0,0,0,0
 
-enemy_test_entity:
-    ; Sprite cmp (+0)
-    ; y, x, tile, properties
-    db 144,56,$14,0
-    db 144,64,$16,0
-    ; Physics cmp (+8)
-    ; y, x, vy, vx
-    db 0,0,0,0
-    db 0,0,0,0
-
 section "Space Scene", ROM0
 
 space_scene_init::
@@ -90,25 +80,9 @@ entities_init::
     ld b, SIZEOF_SPRI_CMP
     call memcpy256
     ; Init penguin physics cmp
-    ; call man_entity_alloc
     ld d, CMP_PHYSICS_H
     ld e, l
     ld hl, (penguin_entity + SIZEOF_SPRI_CMP)
-    ld b, SIZEOF_PHYS_CMP
-    call memcpy256
-
-    ; Init test enemy sprinte cmp
-    call man_entity_alloc
-    ld d, CMP_SPRITE_H
-    ld e, l
-    ld hl, (enemy_test_entity + 0)
-    ld b, SIZEOF_SPRI_CMP
-    call memcpy256
-    ; Init test enemy physics cmp
-    ; call man_entity_alloc
-    ld d, CMP_PHYSICS_H
-    ld e, l
-    ld hl, (enemy_test_entity + SIZEOF_SPRI_CMP)
     ld b, SIZEOF_PHYS_CMP
     call memcpy256
 ret

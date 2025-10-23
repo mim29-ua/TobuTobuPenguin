@@ -21,6 +21,7 @@ man_entity_init::
     call memset256
 
     call free_all_cmps
+    call zero_all_info_components
     call zero_all_sprite_components
 
     ; Init values
@@ -95,7 +96,15 @@ ret
 ;; Set all sprite components to zero
 zero_all_sprite_components::
     ld hl, sprite_cmps_start
-    ld b, SIZEOF_SPRI_CMP
+    ld b, SIZEOF_ARRAY_CMP
+    xor a
+    call memset256
+ret
+
+;; Set all components to zero
+zero_all_info_components::
+    ld hl, info_cmps_start
+    ld b, SIZEOF_ARRAY_CMP
     xor a
     call memset256
 ret
