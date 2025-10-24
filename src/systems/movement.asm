@@ -59,18 +59,6 @@ ret
 
 ;; MOVE LEFT
 
-dead:
-    ld hl, $C103
-    set 6, [hl]
-    ld hl, $C107
-    set 6, [hl]
-    call wait_vblank
-    call man_entity_draw
-    call wait_vblank
-    di
-    halt
-ret
-
 check_move_left:
     ; Check other entities collision
     ld a, LEFT
