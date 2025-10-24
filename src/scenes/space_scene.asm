@@ -195,7 +195,7 @@ generate_random_x_entity:
     
     ld h, CMP_SPRITE_H    ; Man-entity destination address
     
-    ld a, $20
+    xor a
     ld [hl+], a            ; y position
 
     call random_position
@@ -213,7 +213,7 @@ generate_random_x_entity:
         dec e
     jr nz, .loop_sprite_left
 
-    ld a, $20
+    xor a
     ld [hl+], a
 
     ld a, d
@@ -244,12 +244,29 @@ generate_random_x_entity:
     ld e, SIZEOF_PHYS_CMP   ; vy and vx
     dec e
     dec e
-    .loop_physics:
+    .loop_physics_left:
         ld a, [bc]
         ld [hl+], a
         inc bc
         dec e
-    jr nz, .loop_physics
+    jr nz, .loop_physics_left
+
+    xor a
+    ld [hl+], a             ; y position
+
+    ld a, d
+    add 8
+    ld [hl+], a             ; x position
+
+    ld e, SIZEOF_PHYS_CMP   ; vy and vx
+    dec e
+    dec e
+    .loop_physics_right:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_physics_right
 ret
 
 ;; -------------------------------------------------
