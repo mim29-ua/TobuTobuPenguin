@@ -38,6 +38,7 @@ def NON_DIRECTIONAL_PIXELS_OFFSET equ 15
 def MAP_DIMENSION equ 32
 def BACKGROUND_VIEWPORT_Y_ADDR equ $FF42
 def TILE_ROW_19_ADDR equ $9A40
+def MIDDLE_SCREEN_Y_PIXELS equ 96
 
 ; ---------------------------------------------------
 ; ENEMIES

@@ -8,8 +8,8 @@ section "Sprites creation configurations", rom0
 ; y, x, vy, vx
 
 penguin_entity:
-    db 32,24,LEFT_PENGUIN_TILE_IDLE,0
-    db 32,32,LEFT_PENGUIN_TILE_JUMPING,0
+    db 48,80,LEFT_PENGUIN_TILE_IDLE,0
+    db 48,88,LEFT_PENGUIN_TILE_JUMPING,0
     db 32,24,0,0
     db 32,32,0,0
 
