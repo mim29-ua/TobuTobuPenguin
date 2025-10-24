@@ -73,20 +73,6 @@ def TMAP1 equ $9C00
 
 def OAM_START equ $FE00
 
-def LEFT_PENGUIN_Y equ $C100
-def LEFT_PENGUIN_X equ $C101
-def LEFT_PENGUIN_TILE_INDEX equ $C102
-def LEFT_PENGUIN_TILE_IDLE equ $00
-def LEFT_PENGUIN_TILE_JUMPING equ $04
-def LEFT_PENGUIN_ATRS equ $FE03
-
-def RIGHT_PENGUIN_Y equ $C104
-def RIGHT_PENGUIN_X equ $C105
-def RIGHT_PENGUIN_TILE_INDEX equ $C106
-def RIGHT_PENGUIN_TILE_IDLE equ $02
-def RIGHT_PENGUIN_TILE_JUMPING equ $06
-def RIGHT_PENGUIN_ATRS equ $FE07
-
 ;; ---------------------------------------------------
 ;; HARDWARE REGISTERS
 
@@ -137,6 +123,7 @@ def CMP_BIT_SENTINEL equ 7 ; Por si el valor de algun componente coincide con el
 def CMP_BIT_ALIVE equ 6
 def CMP_BIT_PHYSICS equ 5
 def CMP_BIT_RENDER equ 4
+def CMP_BIT_ENEMY equ 3 ; Determines if the entity is enemy or not
 
 ; Entity Manager
 def NUM_ENTITIES equ 10
@@ -149,3 +136,22 @@ def CMP_RESERVED equ (1 << CMP_BIT_ALIVE) ; Para activar el bit 6
 def CMP_INFO_H equ $C0
 def CMP_SPRITE_H equ $C1
 def CMP_PHYSICS_H equ $C2
+
+;; ---------------------------------------------------
+;; ENTITIES
+
+def PENGUIN_INFO_CMPS equ $C000
+
+def LEFT_PENGUIN_Y equ $C100
+def LEFT_PENGUIN_X equ $C101
+def LEFT_PENGUIN_TILE_INDEX equ $C102
+def LEFT_PENGUIN_TILE_IDLE equ $00
+def LEFT_PENGUIN_TILE_JUMPING equ $04
+def LEFT_PENGUIN_ATRS equ $C103
+
+def RIGHT_PENGUIN_Y equ $C104
+def RIGHT_PENGUIN_X equ $C105
+def RIGHT_PENGUIN_TILE_INDEX equ $C106
+def RIGHT_PENGUIN_TILE_IDLE equ $02
+def RIGHT_PENGUIN_TILE_JUMPING equ $06
+def RIGHT_PENGUIN_ATRS equ $C107

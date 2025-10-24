@@ -214,3 +214,15 @@ cp_bc_de::
     ld a, c
     cp e
 ret
+
+inc_de_contents::
+    ld a, [de]
+    inc a
+    ld [de], a
+ret
+
+dec_de_contents::
+    ld a, [de]
+    dec a
+    ld [de], a
+ret

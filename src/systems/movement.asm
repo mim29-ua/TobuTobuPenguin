@@ -7,6 +7,8 @@ section "Movement", ROM0
 ;;
 ;; move -> check_movement -> movement
 
+
+
 ;; Performs the corresponding movements according to pad inputs
 ;; and applies gravity
 ;;
@@ -16,27 +18,30 @@ move::
     ; Decode D-PAD input
     ld a, [last_input]
     bit PADB_DOWN, a
-    call z, check_move_down
+    call z, check_move_penguin_down
     ld a, [last_input]
     bit PADB_UP, a
-    call z, check_move_up
+    call z, check_move_penguin_up
     ld a, [last_input]
     bit PADB_LEFT, a
-    call z, check_move_left
+    call z, check_move_penguin_left
     ld a, [last_input]
     bit PADB_RIGHT, a
-    call z, check_move_right
+    call z, check_move_penguin_right
 
     ; Gravity (not applies if UP pressed)
     ld a, [last_input]
     bit PADB_UP, a
     ret z
-    call check_move_down
+    call check_move_penguin_down
 ret
 
-;; MOVE RIGHT
 
-check_move_right:
+
+;; ---------------------------------------------------
+;; CHECK PENGUIN MOVES
+
+check_move_penguin_right:
     ; Check other entities collision
     ld a, RIGHT
     ld [actual_movement], a
@@ -46,20 +51,14 @@ check_move_right:
     ; Check wall collision
     ld a, [LEFT_PENGUIN_X]
     cp RIGHT_WALL_PIXEL
-    call nz, move_right
+    ret z
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_right
 ret
 
-move_right:
-    ld h, CMP_SPRITE_H
-    ld l, CMP_SPRI_L_X
-    inc [hl]
-    ld l, CMP_SPRI_R_X
-    inc [hl]
-ret
-
-;; MOVE LEFT
-
-check_move_left:
+check_move_penguin_left:
     ; Check other entities collision
     ld a, LEFT
     ld [actual_movement], a
@@ -69,20 +68,14 @@ check_move_left:
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_X]
     cp LEFT_WALL_PIXEL
-    call nz, move_left
+    ret z
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_left
 ret
 
-move_left:
-    ld h, CMP_SPRITE_H
-    ld l, CMP_SPRI_L_X
-    dec [hl]
-    ld l, CMP_SPRI_R_X
-    dec [hl]
-ret
-
-;; MOVE DOWN
-
-check_move_down:
+check_move_penguin_down:
     ; Check other entities collision
     ld a, DOWN
     ld [actual_movement], a
@@ -93,23 +86,16 @@ check_move_down:
     ld a, [LEFT_PENGUIN_Y]
     cp DOWN_WALL_PIXEL
     call z, .dead
-    call move_down
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_down
     ret
     .dead:
         call dead
 ret
 
-move_down:
-    ld h, CMP_SPRITE_H
-    ld l, CMP_SPRI_L_Y
-    inc [hl]
-    ld l, CMP_SPRI_R_Y
-    inc [hl]
-ret
-
-;; MOVE UP
-
-check_move_up:
+check_move_penguin_up:
     ; Check other entities collision
     ld a, UP
     ld [actual_movement], a
@@ -124,17 +110,104 @@ check_move_up:
     ; Check middle of screen reached to make tilemap go up
     ld a, [LEFT_PENGUIN_Y]
     cp MIDDLE_SCREEN_Y_PIXELS
-    jr c, .move_background
-    call move_up
+    jr c, .move_scene_down
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_up
     ret
-    .move_background:
+
+    .move_scene_down:
         call move_background
+        ld hl, move_entity_down
+        call man_entity_for_each_not_penguin
 ret
 
-move_up:
-    ld h, CMP_SPRITE_H
-    ld l, CMP_SPRI_L_Y
-    dec [hl]
-    ld l, CMP_SPRI_R_Y
-    dec [hl]
+
+
+;; ---------------------------------------------------
+;; MOVE ENTITIES
+
+;; Move one entity up
+;;
+;; INPUT:
+;;      de -> Entity INFO component address
+move_entity_up::
+    ; Move to corresponding SPRITE component
+    ld d, CMP_SPRITE_H
+
+    ; Move to corresponding left SPRITE component Y byte
+    ld a, e
+    add CMP_SPRI_L_Y
+    ld e, a
+    call dec_de_contents
+
+    ; Move to corresponding right SPRITE component Y byte
+    ld a, e
+    add (CMP_SPRI_R_Y - CMP_SPRI_L_Y)
+    ld e, a
+    call dec_de_contents
+ret
+
+;; Move one entity down
+;;
+;; INPUT:
+;;      de -> Entity INFO component address
+move_entity_down::
+    ; Move to corresponding SPRITE component
+    ld d, CMP_SPRITE_H
+
+    ; Move to corresponding left SPRITE component Y byte
+    ld a, e
+    add CMP_SPRI_L_Y
+    ld e, a
+    call inc_de_contents
+
+    ; Move to corresponding right SPRITE component Y byte
+    ld a, e
+    add (CMP_SPRI_R_Y - CMP_SPRI_L_Y)
+    ld e, a
+    call inc_de_contents
+ret
+
+;; Move one entity right
+;;
+;; INPUT:
+;;      de -> Entity INFO component address
+move_entity_right::
+    ; Move to corresponding SPRITE component
+    ld d, CMP_SPRITE_H
+
+    ; Move to corresponding left SPRITE component X byte
+    ld a, e
+    add CMP_SPRI_L_X
+    ld e, a
+    call inc_de_contents
+
+    ; Move to corresponding right SPRITE component X byte
+    ld a, e
+    add (CMP_SPRI_R_X - CMP_SPRI_L_X)
+    ld e, a
+    call inc_de_contents
+ret
+
+;; Move one entity left
+;;
+;; INPUT:
+;;      de -> Entity INFO component address
+move_entity_left::
+    ; Move to corresponding SPRITE component
+    ld d, CMP_SPRITE_H
+
+    ; Move to corresponding left SPRITE component X byte
+    ld a, e
+    add CMP_SPRI_L_X
+    ld e, a
+    call dec_de_contents
+
+    ; Move to corresponding right SPRITE component X byte
+    ld a, e
+    add (CMP_SPRI_R_X - CMP_SPRI_L_X)
+    ld e, a
+    call dec_de_contents
 ret
