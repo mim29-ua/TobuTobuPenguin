@@ -128,6 +128,7 @@ check_move_up:
 ret
 
 move_up:
+    call animate_enemies
     call move_background
     ld h, CMP_SPRITE_H
     ld l, CMP_SPRI_L_Y

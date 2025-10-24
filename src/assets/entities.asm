@@ -14,8 +14,8 @@ penguin_entity:
     db 32,32,0,0
 
 ovni_entity:
-    db $18, 0
-    db $18, %00100000
+    db $12, 0
+    db $12, %00100000
     db 0,0
     db 0,0
 
@@ -39,7 +39,7 @@ owl_entity:
 
 windmill_entity:
     db $1E, 0
-    db $1E, %00100000
+    db $1E, %01100000
     db 0,0
     db 0,0
 

@@ -22,6 +22,7 @@ move_background::
         ret
 
     .change_tilemap:
+        call generate_random_enemy
 
         ld hl, rLCDC
         bit 3, [hl]

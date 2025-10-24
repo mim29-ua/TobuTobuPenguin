@@ -44,6 +44,17 @@ def TILE_ROW_19_ADDR equ $9A40
 
 def ENEMIES_TYPES_NUMBER equ 5
 def RANDOM_CLOCK_ADDR equ $FF04
+def FIRST_ENEMIES_ADDR_L equ $08
+
+def AIRSHIP_INITIAL_TILE equ $08
+
+def OVNI_INITIAL_TILE equ $12
+
+def GHOST_INITIAL_TILE equ $0C
+
+def OWL_INITIAL_TILE equ $1A
+
+def WINDMILL_INITIAL_TILE equ $1E
 
 ; ---------------------------------------------------
 ; JOYPAD

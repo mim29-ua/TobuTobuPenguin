@@ -180,15 +180,14 @@ generate_random_enemy:
         jr .continue
 
     .continue
-        call generate_enemy
-    
+        call generate_random_x_entity   
 ret
 
 ; Generate a new enemy
 ;
 ; Input
 ; bc -> enemy config address
-generate_enemy:
+generate_random_x_entity:
 
     call man_entity_alloc
     
@@ -236,7 +235,7 @@ generate_enemy:
 
     ld h, CMP_PHYSICS_H
 
-    ld a, $20
+    xor a
     ld [hl+], a             ; y position
 
     ld a, d
@@ -251,6 +250,7 @@ generate_enemy:
         inc bc
         dec e
     jr nz, .loop_physics
+ret
 
 ;; -------------------------------------------------
 ;  ENTITIES
@@ -270,3 +270,7 @@ penguin_entity_init::
     ld b, SIZEOF_PHYS_CMP
     call memcpy256
 ret
+
+;; -------------------------------------------------
+;  OBJECTS
+
