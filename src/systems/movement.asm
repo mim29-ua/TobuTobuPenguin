@@ -4,9 +4,12 @@ section "Movement", ROM0
 
 ;; Movement works by updating the CMP_SPRI 
 ;; coordinates according to the DPAD inputs
-
+;;
 ;; move -> check_movement -> movement
 
+;; Performs the corresponding movements according to pad inputs
+;; and applies gravity
+;;
 ;; INPUT:
 ;;      b -> DPAD input, 0 == pressed
 move::
@@ -56,18 +59,6 @@ ret
 
 ;; MOVE LEFT
 
-dead:
-    ld hl, $C103
-    set 6, [hl]
-    ld hl, $C107
-    set 6, [hl]
-    call wait_vblank
-    call man_entity_draw
-    call wait_vblank
-    di
-    halt
-ret
-
 check_move_left:
     ; Check other entities collision
     ld a, LEFT
@@ -101,7 +92,11 @@ check_move_down:
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
     cp DOWN_WALL_PIXEL
-    call nz, move_down
+    call z, .dead
+    call move_down
+    ret
+    .dead:
+        call dead
 ret
 
 move_down:
@@ -124,7 +119,16 @@ check_move_up:
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
     cp UP_WALL_PIXEL
-    call nz, move_up
+    ret z
+
+    ; Check middle of screen reached to make tilemap go up
+    ld a, [LEFT_PENGUIN_Y]
+    cp MIDDLE_SCREEN_Y_PIXELS
+    jr c, .move_background
+    call move_up
+    ret
+    .move_background:
+        call move_background
 ret
 
 move_up:

@@ -1,18 +1,21 @@
 include "constants.inc"
 
 section "Entity Manager Data", WRAM0
-num_entities_alive: ds 1
-next_free_entity: ds 1
+
+num_entities_alive: ds 1 ; Counter of alive entities
+next_free_entity: ds 1 ; Address of the next free entity
 
 section "Component Info", WRAM0[$C000]
-info_cmps_start:: ds SIZEOF_ARRAY_CMP
+info_cmps_start:: ds SIZEOF_ARRAY_CMP ; Info components start address
 section "Component Sprite", WRAM0[$C100]
-sprite_cmps_start:: ds SIZEOF_ARRAY_CMP
+sprite_cmps_start:: ds SIZEOF_ARRAY_CMP ; Sprite components start address
 section "Component Physics", WRAM0[$C200]
-physics_cmps_start:: ds SIZEOF_ARRAY_CMP
+physics_cmps_start:: ds SIZEOF_ARRAY_CMP ; Physics components start address
 
 section "Entity Manager Code", ROM0
 
+;; Prepares al the Entity Manager components memory space ($C000 - $CXFF)
+;; Initializes Entity Manager variables
 man_entity_init::
     ; Set the array of entities sprites components to 0
     ld hl, sprite_cmps_start
@@ -29,6 +32,8 @@ man_entity_init::
     ld [num_entities_alive], a
 ret
 
+;; Reserves next free INFO components space
+;;
 ;; RETURN
 ;;   hl: memory address of sprite component
 man_entity_alloc::
@@ -36,6 +41,9 @@ man_entity_alloc::
     ld [hl], CMP_RESERVED
 ret
 
+;; Finds next INFO components free space
+;; and returns its address
+;;
 ;; RETURN
 ;;   hl -> Free entity address
 man_entity_find_first_free::
@@ -51,6 +59,9 @@ man_entity_find_first_free::
     jr .check_if_free
 ret
 
+;; Applies a given function to all entities
+;; TODO: pending of testing
+;;
 ;; INPUT
 ;;   hl -> Process routine address
 man_entity_for_each::
@@ -93,7 +104,7 @@ free_all_cmps::
         jr nz, .free_all_cmps_loop
 ret
 
-;; Set all sprite components to zero
+;; Set all SPRITE components to zero
 zero_all_sprite_components::
     ld hl, sprite_cmps_start
     ld b, SIZEOF_ARRAY_CMP
@@ -101,7 +112,7 @@ zero_all_sprite_components::
     call memset256
 ret
 
-;; Set all components to zero
+;; Set all INFO components to zero
 zero_all_info_components::
     ld hl, info_cmps_start
     ld b, SIZEOF_ARRAY_CMP
@@ -109,6 +120,8 @@ zero_all_info_components::
     call memset256
 ret
 
+;; Applies a given multi-entity function to one entity with the other ones
+;;
 ;; INPUT
 ;;   hl -> Process routine address
 ;;   bc -> Main entity to compare with
@@ -148,6 +161,7 @@ man_entity_for_one_for_each::
     jr .loop
 ret
 
+;; Checks if any entity is colliding with the penguin
 check_colliding_entities_with_penguin::
     ld hl, are_boxes_colliding
     ld b, CMP_INFO_H

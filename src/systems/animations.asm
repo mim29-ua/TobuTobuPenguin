@@ -2,15 +2,17 @@ include "constants.inc"
 
 section "Animation Variables", wram0
 
-flying_animation_counter: ds 1
+flying_animation_counter: ds 1 ; Game loops between tiles swaping when animating
 
 section "Animations", ROM0
 
+;; Initializes animation variables
 animations_init::
     ld a, ANIMATION_SPEED
     ld [flying_animation_counter], a
 ret
 
+;; Performs the corresponding animations for each game loop
 animate::
     ld a, [last_input]
     bit PADB_UP, a
@@ -20,6 +22,7 @@ animate::
     call nz, set_jumping_sprite
 ret
 
+;; Sets the jumping sprite for the penguin
 set_jumping_sprite:
     ; Checks if sprite is already set
     ld a, [LEFT_PENGUIN_TILE_INDEX]
@@ -33,6 +36,7 @@ set_jumping_sprite:
     ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
+;; Sets the idle sprite for the penguin
 set_idle_sprite:
     ; Checks if sprite is already set
     ld a, [LEFT_PENGUIN_TILE_INDEX]
@@ -46,6 +50,7 @@ set_idle_sprite:
     ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
+;; Performs the flying animation (idle-jumping tiles swap)
 flying_animation:
     ld hl, flying_animation_counter
     dec [hl]

@@ -7,6 +7,8 @@ pixels_offset_2: ds 1
 
 section "Collisions System", ROM0
 
+;; Sets the appropiate Y pixels offset (w) for each movement
+;;
 ;; READS:
 ;;      actual_movement
 ;; OUTPUT:
@@ -48,6 +50,8 @@ load_pixels_offset_for_Y_into_a:
         ld [pixels_offset_2], a
 ret
 
+;; Sets the appropiate X pixels offset (w) for each movement
+;;
 ;; READS:
 ;;      actual_movement
 ;; OUTPUT:

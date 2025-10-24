@@ -4,14 +4,23 @@ section "Input Variables", WRAM0
 
 last_input: ds 1
 
-; 0 -> Down
-; 1 -> Up
-; 2 -> Left
-; 3 -> Right
+;; Movement being performed during the current game loop
+;;
+;; Possible values:
+;;      0 -> Down
+;;      1 -> Up
+;;      2 -> Left
+;;      3 -> Right
 actual_movement: ds 1
 
 section "Input", ROM0
 
+;; Hardware dpad OR buttons reading
+;;
+;; INPUT:
+;;      a -> dpad/buttons selection for reading
+;; OUTPUT:
+;;      a -> dpad/buttons inputs
 read_pad:
     ldh [rP1], a
     ldh a, [rP1]
@@ -19,6 +28,10 @@ read_pad:
     ldh a, [rP1]
 ret
 
+;; Gets ALL/BOTH dpad and Buttons inputs and
+;;
+;; OUTPUT:
+;;      last_input -> All pad inputs together. Ex. (D-PAD) -> 1011, (BTN) -> 1110
 get_pad_input::
     ; Read the D-PAD
     ld a, P1F_GET_DPAD
