@@ -190,6 +190,7 @@ ret
 generate_random_x_entity:
 
     call man_entity_alloc
+    call set_entity_as_enemy
     
     ; Sprite component
     

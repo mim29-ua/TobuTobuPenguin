@@ -78,7 +78,6 @@ ret
 animate_enemies::
     ld h, CMP_INFO_H
     ld l, FIRST_ENEMIES_ADDR_L ; hl = $C008
-    ld c, CMP_SENTINEL         ; c  = $FF
 
     .loop:
         ld a, l
@@ -87,8 +86,8 @@ animate_enemies::
 
         ld a, [hl]
 
-        cp $40                  
-        jr nz, .continue        ; Next iteration, if the position is free
+        bit CMP_BIT_ENEMY, a
+        jr z, .continue        ; Next iteration, if the position is free
 
         call check_enemy_type
         jr .loop
