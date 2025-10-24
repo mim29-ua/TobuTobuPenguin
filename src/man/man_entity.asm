@@ -150,7 +150,7 @@ man_entity_for_one_for_each::
         ; return:
         pop hl
         pop de
-        ret c
+        ret c ; WARNING, ONLY APPLIES FOR CHECKING COLLIIONS, ACTION NEEDED
 
         .next:
             ld a, e
@@ -167,4 +167,52 @@ check_colliding_entities_with_penguin::
     ld b, CMP_INFO_H
     ld c, 0 ; SKIP PENGUIN ENTITIES
     call man_entity_for_one_for_each
+ret
+
+;; Applies a given function to all entities but the penguin
+;;
+;; INPUT
+;;   hl -> Process routine address
+man_entity_for_each_not_penguin::
+    ld de, info_cmps_start
+    .loop:
+        ; Check not traspassing end of cmps memory section
+        ld a, e
+        cp SIZEOF_ARRAY_CMP
+        ret z
+
+        ; Check reserved/alive entity
+        ld a, [de]
+        bit CMP_BIT_ALIVE, a
+        jr z, .next
+
+        ; Check entity is not enemy
+        ld a, [de]
+        bit CMP_BIT_ENEMY, a
+        jr z, .next
+
+        ; process:
+        push de
+        push hl
+        call helper_call_hl
+
+        ; return:
+        pop hl
+        pop de
+
+        .next:
+            ld a, e
+            add SIZEOF_INFO_CMP
+            ld e, a
+            jr nc, .loop
+            inc d
+    jr .loop
+ret
+
+;; Sets the enemy bit of the given entity
+;;
+;; INPUT:
+;;      hl -> Entity INFO component start address
+set_entity_as_enemy::
+    set CMP_BIT_ENEMY, [hl]
 ret
