@@ -1,9 +1,11 @@
 ;; ---------------------------------------------------
 ;; VALUES
 
+def ANIMATION_SPEED equ 10
+def DEFAULT_JUMP_HEIGHT equ 20
+
 def DEFAULT_PAL equ %11100100
 def P1F_GET_NONE equ 0
-def ANIMATION_SPEED equ 10
 def VBLANK_START_LINE equ $90
 def VRAM_TILE_SIZE equ $10
 def TMAP_LINE_SIZE equ $20

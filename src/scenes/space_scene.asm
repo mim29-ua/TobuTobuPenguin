@@ -12,6 +12,7 @@ space_scene_init::
     ; Load animations variables
     call wait_vblank
     call animations_init
+    call movements_init
 
     call lcd_off
 
