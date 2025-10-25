@@ -123,7 +123,32 @@ check_move_penguin_up:
         call man_entity_for_each_not_penguin
 ret
 
+;; ---------------------------------------------------
+;; MOVE ENEMIES
 
+check_enemies_movement::
+    ld h, CMP_INFO_H
+    ld l, FIRST_ENEMIES_ADDR_L
+
+    .loop:
+        ld a, l
+        cp NUM_ENTITIES * SIZEOF_INFO_CMP
+        ret z
+
+        ld a, [hl]
+
+        bit CMP_BIT_ENEMY, a
+        jr z, .continue        ; Next iteration, if the position is free
+
+        call check_enemy_type
+        jr .loop
+
+        .continue:              ; Next info component
+            ld a, l
+            add SIZEOF_INFO_CMP
+            ld l, a
+    jr .loop
+ret
 
 ;; ---------------------------------------------------
 ;; MOVE ENTITIES

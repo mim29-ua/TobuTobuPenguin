@@ -14,32 +14,32 @@ penguin_entity:
     db 32,32,0,0
 
 ovni_entity:
-    db $12, 0
-    db $12, %00100000
+    db $12, 16
+    db $12, %00110000
     db 0,0
     db 0,0
 
 airship_entity:
-    db $08, 0
-    db $0A, 0
+    db $08, 16
+    db $0A, 16
     db 0,0
     db 0,0
 
 ghost_entity:
-    db $0C, 0
-    db $0E, 0
+    db $0C, 16
+    db $0E, 16
     db 0,0
     db 0,0
 
 owl_entity:
-    db $1A, 0
-    db $1A, %00100000
+    db $1A, 16
+    db $1A, %00110000
     db 0,0
     db 0,0
 
 windmill_entity:
-    db $1E, 0
-    db $1E, %01100000
+    db $1E, 16
+    db $1E, %01110000
     db 0,0
     db 0,0
 

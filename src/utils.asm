@@ -227,3 +227,30 @@ dec_de_contents::
     dec a
     ld [de], a
 ret
+
+check_min_max_x::
+    ld a, l
+    sub CMP_PHYS_VX - CMP_PHYS_X
+    ld l, a
+
+    ld a, [hl]
+    
+    sub 8
+    cp LEFT_WALL_PIXEL
+    jr nc, .continue
+        ld a, LEFT_WALL_PIXEL + 8
+        ld [hl], a
+        ld h, CMP_SPRITE_H
+        ld [hl], a
+        ret
+
+    .continue:
+        
+        add 24
+        cp RIGHT_WALL_PIXEL
+        ret c
+            ld a, RIGHT_WALL_PIXEL - 24
+            ld [hl], a
+            ld h, CMP_SPRITE_H
+            ld [hl], a
+ret

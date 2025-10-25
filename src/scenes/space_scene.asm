@@ -40,6 +40,7 @@ space_scene_run::
     call get_pad_input ; Returns b, don't touch it
     call move ; Uses b
     call animate ; Uses b
+    call check_enemies_movement
 jr space_scene_run
 
 ; Copy entities sprites to OAM
@@ -70,7 +71,7 @@ ret
 load_ui_tiles::
     ld hl, ui_tiles
     ld de, $8840
-    ld bc, 38 * 16
+    ld bc, 50 * 16
     call memcpy65536
 
 ;; -------------------------------------------------
@@ -169,7 +170,9 @@ generate_random_enemy:
 
     .ghost_enemy
         ld bc, ghost_entity
-        jr .continue
+        call generate_random_x_entity
+        call check_min_max_x
+    ret
 
     .owl_enemy
         ld bc, owl_entity
@@ -236,38 +239,22 @@ generate_random_x_entity:
 
     ld h, CMP_PHYSICS_H
 
-    xor a
-    ld [hl+], a             ; y position
+    .physics:
 
-    ld a, d
-    ld [hl+], a             ; x position
+        xor a
+        ld [hl+], a
 
-    ld e, SIZEOF_PHYS_CMP   ; vy and vx
-    dec e
-    dec e
-    .loop_physics_left:
+        ld a, d
+        ld [hl+], a
+
         ld a, [bc]
         ld [hl+], a
         inc bc
-        dec e
-    jr nz, .loop_physics_left
 
-    xor a
-    ld [hl+], a             ; y position
-
-    ld a, d
-    add 8
-    ld [hl+], a             ; x position
-
-    ld e, SIZEOF_PHYS_CMP   ; vy and vx
-    dec e
-    dec e
-    .loop_physics_right:
         ld a, [bc]
         ld [hl+], a
-        inc bc
-        dec e
-    jr nz, .loop_physics_right
+        inc bc             
+
 ret
 
 ;; -------------------------------------------------
