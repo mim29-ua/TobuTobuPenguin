@@ -1,6 +1,6 @@
 include "constants.inc"
 
-section "Animation Variables", wram0
+section "Animation Variables", WRAM0
 
 flying_animation_counter: ds 1 ; Game loops between tiles swaping when animating
 
@@ -15,11 +15,15 @@ ret
 ;; Performs the corresponding animations for each game loop
 animate::
     ld a, [last_input]
-    bit PADB_UP, a
-    call z, flying_animation
-    ld a, [last_input]
-    bit PADB_UP, a
-    call nz, set_jumping_sprite
+    bit PADB_DOWN, a
+    jr z, .falling
+
+    .not_falling:
+        call flying_animation
+    ret
+
+    .falling:
+        call set_jumping_sprite
 ret
 
 ;; Sets the jumping sprite for the penguin
