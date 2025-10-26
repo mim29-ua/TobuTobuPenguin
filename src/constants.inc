@@ -1,9 +1,11 @@
 ;; ---------------------------------------------------
 ;; VALUES
 
+def ANIMATION_SPEED equ 10
+def DEFAULT_JUMP_HEIGHT equ 20
+
 def DEFAULT_PAL equ %11100100
 def P1F_GET_NONE equ 0
-def ANIMATION_SPEED equ 10
 def VBLANK_START_LINE equ $90
 def VRAM_TILE_SIZE equ $10
 def TMAP_LINE_SIZE equ $20
@@ -84,6 +86,15 @@ def TMAP1 equ $9C00
 
 def OAM_START equ $FE00
 
+def OAM_PENGUIN_LEFT_SPRITE_PROPIERTIES equ $FE03
+def OAM_PENGUIN_RIGHT_SPRITE_PROPIERTIES equ $FE07
+
+; Sprties attributes (byte 3) bits
+def SPRRITES_ATTRIBUTES_BIT_PRIORITY equ 7
+def SPRRITES_ATTRIBUTES_BIT_Y_FLIP equ 6
+def SPRRITES_ATTRIBUTES_BIT_X_FLIP equ 5
+def SPRRITES_ATTRIBUTES_BIT_DMG_PALETTE equ 4
+
 ;; ---------------------------------------------------
 ;; HARDWARE REGISTERS
 
@@ -135,11 +146,13 @@ def CMP_BIT_ALIVE equ 6
 def CMP_BIT_PHYSICS equ 5
 def CMP_BIT_RENDER equ 4
 def CMP_BIT_ENEMY equ 3 ; Determines if the entity is enemy or not
+def CMP_BIT_PENGUIN equ 2 ; Determines if the entity is penguin or not
 
 ; Entity Manager
 def NUM_ENTITIES equ 10
+def NUM_OBJECTS equ 1
 def CMP_SENTINEL equ $FF
-def CMP_FREE equ 0
+def CMP_FREE equ (0 << CMP_BIT_ALIVE)
 def SIZEOF_ARRAY_CMP equ NUM_ENTITIES * SIZEOF_INFO_CMP
 def CMP_RESERVED equ (1 << CMP_BIT_ALIVE) ; Para activar el bit 6
 

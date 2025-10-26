@@ -1,12 +1,15 @@
 include "constants.inc"
 
+section "Movement Variables", WRAM0
+
+jump_remaining_height: ds 1
+
 section "Movement", ROM0
 
 ;; Movement works by updating the CMP_SPRI 
 ;; coordinates according to the DPAD inputs
 ;;
 ;; move -> check_movement -> movement
-
 
 
 ;; Performs the corresponding movements according to pad inputs
@@ -29,6 +32,8 @@ move::
     bit PADB_RIGHT, a
     call z, check_move_penguin_right
 
+    call check_penguin_jump_movement
+
     ; Gravity (not applies if UP pressed)
     ld a, [last_input]
     bit PADB_UP, a
@@ -36,7 +41,32 @@ move::
     call check_move_penguin_down
 ret
 
+;; Initialize movement variables
+movements_init::
+    xor a
+    ld [jump_remaining_height], a
+ret
 
+;; Makes penguin jump or not
+check_penguin_jump_movement:
+    ; Check if jump has to be performed or not
+    ld a, [jump_remaining_height]
+    cp 0
+    ret z
+
+    ; Decrease counter before performing jump
+    push hl
+    ld hl, jump_remaining_height
+    dec [hl]
+    pop hl
+
+    ; Tweak inputs
+    ld a, [last_input]
+    res PADB_UP, a ; Perform jump    
+    set PADB_DOWN, a ; Disable going down
+    ld [last_input], a
+    call check_move_penguin_up
+ret
 
 ;; ---------------------------------------------------
 ;; CHECK PENGUIN MOVES
@@ -46,7 +76,7 @@ check_move_penguin_right:
     ld a, RIGHT
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
-    call c, dead
+    call c, kill_penguin
 
     ; Check wall collision
     ld a, [LEFT_PENGUIN_X]
@@ -63,7 +93,7 @@ check_move_penguin_left:
     ld a, LEFT
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
-    call c, dead
+    call c, kill_penguin
 
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_X]
@@ -80,7 +110,12 @@ check_move_penguin_down:
     ld a, DOWN
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
-    ret c
+    jr nc, .no_enemy_killed
+    call kill_entity
+    ld a, DEFAULT_JUMP_HEIGHT
+    ld [jump_remaining_height], a
+
+    .no_enemy_killed:
 
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
@@ -92,7 +127,7 @@ check_move_penguin_down:
     call move_entity_down
     ret
     .dead:
-        call dead
+        call kill_penguin
 ret
 
 check_move_penguin_up:
@@ -100,7 +135,7 @@ check_move_penguin_up:
     ld a, UP
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
-    call c, dead
+    call c, kill_penguin
 
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]

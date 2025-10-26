@@ -12,6 +12,7 @@ space_scene_init::
     ; Load animations variables
     call wait_vblank
     call animations_init
+    call movements_init
 
     call lcd_off
 
@@ -37,14 +38,24 @@ ret
 space_scene_run::
     call wait_vblank
     call man_entity_draw
-    call get_pad_input ; Returns b, don't touch it
-    call move ; Uses b
-    call animate ; Uses b
+    call get_pad_input
+    call move
+    call animate
     call check_enemies_movement
 jr space_scene_run
 
 ; Copy entities sprites to OAM
+man_entity_draw_dead_too:
+    ld hl, sprite_cmps_start
+    ld de, OAM_START
+    ld b, SIZEOF_ARRAY_CMP
+    call memcpy256
+ret
+
+; Copy LIVE entities sprites to OAM
 man_entity_draw:
+    ; call memcpy256_sprites_only_alive
+
     ld hl, sprite_cmps_start
     ld de, OAM_START
     ld b, SIZEOF_ARRAY_CMP
@@ -193,6 +204,9 @@ ret
 generate_random_x_entity:
 
     call man_entity_alloc
+    ld a, h
+    cp $FF
+    ret z                 ; No free entity sprite
     call set_entity_as_enemy
     
     ; Sprite component
@@ -263,6 +277,7 @@ ret
 penguin_entity_init::
     ; Init penguin sprite cmp
     call man_entity_alloc
+    call set_entity_as_penguin
     ld d, CMP_SPRITE_H
     ld e, l
     ld hl, (penguin_entity + 0)
@@ -274,16 +289,4 @@ penguin_entity_init::
     ld hl, (penguin_entity + SIZEOF_SPRI_CMP)
     ld b, SIZEOF_PHYS_CMP
     call memcpy256
-ret
-
-dead::
-    ld hl, $C103
-    set 6, [hl]
-    ld hl, $C107
-    set 6, [hl]
-    call wait_vblank
-    call man_entity_draw
-    call wait_vblank
-    di
-    halt
 ret

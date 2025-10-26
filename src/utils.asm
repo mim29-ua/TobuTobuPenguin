@@ -86,6 +86,10 @@ ret
 ;   de: destination
 ;    b: bytes
 memcpy256::
+    push de
+    push hl
+    push bc
+
     ; Check if 0
     dec b 
     inc b
@@ -97,7 +101,11 @@ memcpy256::
         inc hl
         inc de
         dec b
-        jr nz, .loop
+    jr nz, .loop
+
+    pop bc
+    pop hl
+    pop de
 ret
 
 ; INPUT
