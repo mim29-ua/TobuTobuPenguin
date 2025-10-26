@@ -38,6 +38,17 @@ ret
 ;;   hl: memory address of sprite component
 man_entity_alloc::
     call man_entity_find_first_free
+    ld a, h
+    cp $FF
+    ret z ; No free entity found
+    ld [hl], CMP_RESERVED
+ret
+
+man_object_alloc::
+    ld hl, OBJECT_INFO_ADDR
+    ld a, [hl]
+    cp CMP_FREE
+    ret nz ; No free object found
     ld [hl], CMP_RESERVED
 ret
 
@@ -49,14 +60,22 @@ ret
 man_entity_find_first_free::
     ld hl, info_cmps_start
     ld de, SIZEOF_INFO_CMP
-    ld a, CMP_FREE
-    
+
     .check_if_free:
+        ld a, l
+        cp SIZEOF_ARRAY_CMP - NUM_OBJECTS * SIZEOF_INFO_CMP
+        jr z, .exit
+
+        ld a, CMP_FREE
         cp [hl]
         ret z
+
         ; next:
         add hl, de
     jr .check_if_free
+
+    .exit:
+        ld h, $FF ; No free entity found
 ret
 
 ;; Applies a given function to all entities

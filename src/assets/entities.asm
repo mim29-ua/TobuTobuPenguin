@@ -1,6 +1,6 @@
 include "constants.inc"
 
-section "Sprites creation configurations", rom0
+section "Sprites creation configurations", ROM0
 ; Sprite cmp (+0)
 ; y, x, tile, properties (Enemies don't use static x, they use a random x position. And y is always zero when created.)
 

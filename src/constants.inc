@@ -138,6 +138,7 @@ def CMP_BIT_ENEMY equ 3 ; Determines if the entity is enemy or not
 
 ; Entity Manager
 def NUM_ENTITIES equ 10
+def NUM_OBJECTS equ 1
 def CMP_SENTINEL equ $FF
 def CMP_FREE equ 0
 def SIZEOF_ARRAY_CMP equ NUM_ENTITIES * SIZEOF_INFO_CMP
@@ -166,3 +167,19 @@ def RIGHT_PENGUIN_TILE_INDEX equ $C106
 def RIGHT_PENGUIN_TILE_IDLE equ $02
 def RIGHT_PENGUIN_TILE_JUMPING equ $06
 def RIGHT_PENGUIN_ATRS equ $C107
+
+;; ---------------------------------------------------
+;; UI
+
+def INTERRUPTIONS_ADDR equ $FFFF
+def TIMER_CONTROL_ADDR equ $FF07
+def FIRST_CLOCK_SPRITE_ADDR equ $FE50
+def FIRST_DASHES_COUNTER_SPRITE_ADDR equ $FE60
+def UI_COORD_X_INITIAL equ 152
+
+;; ---------------------------------------------------
+;; OBJECTS
+
+def OBJECT_INFO_ADDR equ $C048
+def CLOCK_INITIAL_TILE equ $BE
+def ENERGY_SPRITE_ADDR equ $FE68
