@@ -23,6 +23,7 @@ move_background::
 
     .change_tilemap:
         call generate_random_enemy
+        call generate_x_random_object
 
         ld hl, rLCDC
         bit 3, [hl]
@@ -62,23 +63,6 @@ random_position:
     ld a, [$FF04]
     srl a
     add 9
-ret
-
-; Check if in vblank, wait if not until vblank
-check_vblank::
-    push hl
-    ld hl, rLY
-    ld a, VBLANK_START_LINE
-    cp [hl]
-    jr c, .in_vblank
-    
-    ; Esperar hasta vblank
-    .wait_loop:
-        cp [hl]
-        jr nz, .wait_loop
-    
-    .in_vblank:
-        pop hl
 ret
 
 ; INPUT
@@ -137,6 +121,23 @@ memcpy65536::
     jr .loop
 ret
 
+memcpy256_vblank::
+    ; Check if 0
+    dec b 
+    inc b
+    ret z
+    ; Loop
+    call wait_vblank
+    di
+    .loop:  
+        ld a, [hl]
+        ld [de], a
+        inc hl
+        inc de
+        dec b
+        jr nz, .loop
+    ei
+ret
 ; INPUT
 ;   hl: source
 ;    b: bytes
@@ -152,13 +153,13 @@ lcd_off::
     call wait_vblank
     ld hl, rLCDC
     res 7, [hl]
-    ei 
 ret
 
 lcd_on::
     ld hl, rLCDC
     ld a, $97
     ld [hl], a
+    ei
 ret
 
 clear_oam::
@@ -237,6 +238,7 @@ dec_de_contents::
 ret
 
 check_min_max_x::
+    di
     ld a, l
     sub CMP_PHYS_VX - CMP_PHYS_X
     ld l, a
@@ -250,6 +252,10 @@ check_min_max_x::
         ld [hl], a
         ld h, CMP_SPRITE_H
         ld [hl], a
+        ld de, CMP_SPRI_R_X-CMP_SPRI_L_X
+        add hl, de
+        add 8
+        ld [hl], a
         ret
 
     .continue:
@@ -261,4 +267,22 @@ check_min_max_x::
             ld [hl], a
             ld h, CMP_SPRITE_H
             ld [hl], a
+            ld de, CMP_SPRI_R_X-CMP_SPRI_L_X
+            add hl, de
+            add 8
+            ld [hl], a
+
+    ei
+ret
+
+active_time_interruption::
+    ld a, [INTERRUPTIONS_ADDR]
+    or %00000100
+    ld [INTERRUPTIONS_ADDR], a
+
+    ld a, [TIMER_CONTROL_ADDR]
+    or %00000100
+    and %11111100
+    ld [TIMER_CONTROL_ADDR], a
+
 ret

@@ -148,6 +148,7 @@ check_move_penguin_up:
     jr c, .move_scene_down
 
     ; Move penguin
+    call dec_dash_counter
     ld de, PENGUIN_INFO_CMPS
     call move_entity_up
     ret
@@ -161,13 +162,13 @@ ret
 ;; ---------------------------------------------------
 ;; MOVE ENEMIES
 
-check_enemies_movement::
+enemies_movement::
     ld h, CMP_INFO_H
     ld l, FIRST_ENEMIES_ADDR_L
 
     .loop:
         ld a, l
-        cp NUM_ENTITIES * SIZEOF_INFO_CMP
+        cp NUM_ENTITIES * SIZEOF_INFO_CMP - SIZEOF_INFO_CMP * NUM_OBJECTS
         ret z
 
         ld a, [hl]

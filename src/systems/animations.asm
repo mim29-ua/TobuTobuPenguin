@@ -76,33 +76,6 @@ flying_animation:
         ld [hl], ANIMATION_SPEED
 ret
 
-;; ---------------------------------
-;  ENEMY ANIMATIONS
-
-animate_enemies::
-    ld h, CMP_INFO_H
-    ld l, FIRST_ENEMIES_ADDR_L ; hl = $C008
-
-    .loop:
-        ld a, l
-        cp NUM_ENTITIES * SIZEOF_INFO_CMP
-        ret z
-
-        ld a, [hl]
-
-        bit CMP_BIT_ENEMY, a
-        jr z, .continue        ; Next iteration, if the position is free
-
-        call check_enemy_type
-        jr .loop
-
-        .continue:              ; Next info component
-            ld a, l
-            add SIZEOF_INFO_CMP
-            ld l, a
-    jr .loop
-ret
-
 ; Check the enemy type and set the appropriate animation
 ;
 ; Input
@@ -328,3 +301,49 @@ four_frames_animation_symmetric::
         add hl, de
         ld [hl], a      ; Right sprite
 ret
+
+;; ------------------------------------
+;  OBJECT ANIMATION
+
+animate_object::
+    ld hl, OBJECT_INFO_ADDR
+    ld a, [hl]
+    cp CMP_RESERVED
+    ret nz
+
+    ld h, CMP_SPRITE_H
+    ld a, l
+    add CMP_SPRI_L_TILE - CMP_SPRI_L_Y
+    ld l, a
+
+    ld a, [hl] ; a = actual tile
+
+    ld b, CLOCK_INITIAL_TILE
+    cp b
+    jr z, .second_tile
+    
+    .first_tile:
+        ld a, $BE
+        ld [hl], a
+
+        ld a, l
+        add CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
+        ld l, a
+
+        ld a, $C0
+        ld [hl], a
+    ret
+    
+    .second_tile:
+
+        ld a, $C2
+        ld [hl], a
+
+        ld a, l
+        add CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
+        ld l, a
+
+        ld a, $C4
+        ld [hl], a
+ret
+        
