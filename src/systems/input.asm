@@ -54,9 +54,18 @@ get_pad_input::
     ld [last_input], a
 ret
 
+;; Loops until a pad input is detected
 press_to_start::
     call get_pad_input
     cp $FF
     call nz, main
     jr press_to_start
+ret
+
+;; Loops until the start button is pressed
+press_start_to_start::
+    call get_pad_input
+    bit PADB_START, a
+    call z, main
+    jr press_start_to_start
 ret
