@@ -1,3 +1,11 @@
+include "constants.inc"
+
+section "Internal UI Data", WRAM0
+
+internal_ui_clock: ds 1
+internal_active_clock_configuration: ds 1
+internal_dash_counter: ds 1
+
 section "UI Assets", ROM0
 
 ; TIEMPO RESTANTE (ESTE ES DIFÍCIL DE EXPLICAR PERO LO INTENTO, ES UN 
@@ -7,31 +15,113 @@ section "UI Assets", ROM0
 ; SEMICIRCULO MENOS UN OCTAVO, OTRO UN CUARTO Y BLANCO, OTRO UN OCTAVO 
 ; Y BLANCO Y POR ÚLTIMO UNO BLANCO COMPLETO)
 
+first_clock_configurations: ; 8/8
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 16, UI_COORD_X_INITIAL + 8, $88, 16
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $88, %01010000
+
+second_clock_configurations: ; 7/8
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 16, UI_COORD_X_INITIAL + 8, $BB, 16 
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $88, %01010000
+
+third_clock_configurations: ; 6/8
+    db 16, UI_COORD_X_INITIAL, $84, 16 
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $88, %01010000
+
+fourth_clock_configurations: ; 5/8
+    db 16, UI_COORD_X_INITIAL, $84, 16 
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $BC, 16
+
+fifth_clock_configurations: ; 4/8
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $8A, %01010000
+
+sixth_clock_configurations: ; 3/8
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $B8, 16
+    db 32, UI_COORD_X_INITIAL + 8, $8A, %01010000
+
+seventh_clock_configurations: ; 2/8
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $86, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $8A, %01010000
+
+eighth_clock_configurations: ; 1/8
+    db 16, UI_COORD_X_INITIAL, $B6, 16
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $86, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $8A, %01010000
+
+nineth_clock_configurations: ; 0/8
+    db 16, UI_COORD_X_INITIAL, $86, 16
+    db 16, UI_COORD_X_INITIAL + 8, $8A, 16
+    db 32, UI_COORD_X_INITIAL, $86, %01010000
+    db 32, UI_COORD_X_INITIAL + 8, $8A, %01010000
+
+three_dashes_configuration::
+    db 144, UI_COORD_X_INITIAL, $B0, 16
+    db 144, UI_COORD_X_INITIAL + 8, $B2, 16
+
+two_dashes_configuration::
+    db 144, UI_COORD_X_INITIAL, $AC, 16
+    db 144, UI_COORD_X_INITIAL + 8, $AE, 16
+
+one_dash_configuration::
+    db 144, UI_COORD_X_INITIAL, $A8, 16
+    db 144, UI_COORD_X_INITIAL + 8, $AA, 16
+
+zero_dashes_configuration::
+    db 144, UI_COORD_X_INITIAL, $A4, 16
+    db 144, UI_COORD_X_INITIAL + 8, $A6, 16
+
 ui_sprites::
 
-    ; Left part
-    db 16, 152, $84, 16
-    db 32, 152, $84, %01010000
-    db 48, 152, $8C, 16
-    db 64, 152, $90, 16
-    db 80, 152, $90, 16
-    db 96, 152, $96, 16
-    db 112, 152, $9C, 16
-    db 128, 152, $A0, 16
-    db 129, 153, $B4, 16
-    db 144, 152, $B0, 16
+    ; Clock - Left part
+    db 16, UI_COORD_X_INITIAL, $84, 16
+    db 32, UI_COORD_X_INITIAL, $84, %01010000
 
-    ; Right part
-    db 16, 160, $88, 16
-    db 32, 160, $88, %01010000
-    db 64, 160, $92, 16
-    db 48, 160, $8E, 16
-    db 80, 160, $92, 16
-    db 96, 160, $9A, 16
-    db 112, 160, $9E, 16
-    db 128, 160, $A2, 16
-    db 129, 161, $B4, 16
-    db 144, 160, $B2, 16
+    ; Clock - Right part
+    db 16, UI_COORD_X_INITIAL + 8, $88, 16
+    db 32, UI_COORD_X_INITIAL + 8, $88, %01010000
+
+    ; Dashes - Left part
+    db 144, UI_COORD_X_INITIAL, $B0, 16
+
+    ; Dashes - Right part
+    db 144, UI_COORD_X_INITIAL + 8, $B2, 16
+
+    ; Energy - Left part
+    db 129, UI_COORD_X_INITIAL + 1, $B4, 16
+
+    ; Energy - Right part
+    db 129, UI_COORD_X_INITIAL + 8 + 1, $B4, 16
+
+    ; UI - Left part
+    db 48, UI_COORD_X_INITIAL, $8C, 16
+    db 64, UI_COORD_X_INITIAL, $90, 16
+    db 80, UI_COORD_X_INITIAL, $90, 16
+    db 96, UI_COORD_X_INITIAL, $96, 16
+    db 112, UI_COORD_X_INITIAL, $9C, 16
+    db 128, UI_COORD_X_INITIAL, $A0, 16
+
+    ; UI - Right part
+    db 64, UI_COORD_X_INITIAL + 8, $92, 16
+    db 48, UI_COORD_X_INITIAL + 8, $8E, 16
+    db 80, UI_COORD_X_INITIAL + 8, $92, 16
+    db 96, UI_COORD_X_INITIAL + 8, $9A, 16
+    db 112, UI_COORD_X_INITIAL + 8, $9E, 16
+    db 128, UI_COORD_X_INITIAL + 8, $A2, 16
 
 ui_tiles::
 
@@ -85,12 +175,11 @@ ui_tiles::
     DB $E0, $E0, $F0, $F0, $78, $78, $F8, $F8, $F8, $F8, $F0, $F0, $C0, $C0, $00, $00
     DB $FF, $00, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00, $00
     DB $FF, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00
-
-load_ui_sprites::
-    ld de, $FE50
-    ld hl, ui_sprites
-    ld b, 20 * 4
-
-    call memcpy256
-ret
-
+    DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $7F, $FF, $80, $80, $83, $83, $8F, $8F, $8F, $8F, $87, $87, $83, $83, $81, $81
+    DB $BF, $BF, $BE, $BE, $9C, $9C, $98, $98, $80, $80, $80, $80, $80, $80, $7F, $FF
+    DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $FF, $FF, $00, $00, $00, $00, $00, $00, $18, $18, $38, $38, $7C, $7C, $FC, $FC
+    DB $80, $80, $C0, $C0, $E0, $E0, $F0, $F0, $F0, $F0, $C0, $C0, $00, $00, $FF, $FF
+    DB $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00

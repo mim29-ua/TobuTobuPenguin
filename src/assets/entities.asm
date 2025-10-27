@@ -1,6 +1,6 @@
 include "constants.inc"
 
-section "Sprites creation configurations", rom0
+section "Sprites creation configurations", ROM0
 ; Sprite cmp (+0)
 ; y, x, tile, properties (Enemies don't use static x, they use a random x position. And y is always zero when created.)
 
@@ -8,8 +8,8 @@ section "Sprites creation configurations", rom0
 ; y, x, vy, vx
 
 penguin_entity:
-    db 48,80,LEFT_PENGUIN_TILE_IDLE,0
-    db 48,88,LEFT_PENGUIN_TILE_JUMPING,0
+    db 48,80,LEFT_PENGUIN_TILE_JUMPING,0
+    db 48,88,RIGHT_PENGUIN_TILE_JUMPING,0
     db 32,24,0,0
     db 32,32,0,0
 

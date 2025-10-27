@@ -44,6 +44,14 @@ man_entity_alloc::
     ld [hl], CMP_RESERVED
 ret
 
+man_object_alloc::
+    ld hl, OBJECT_INFO_ADDR
+    ld a, [hl]
+    cp CMP_FREE
+    ret nz ; No free object found
+    ld [hl], CMP_RESERVED
+ret
+
 ;; Finds next INFO components free space
 ;; and returns its address
 ;;
@@ -52,10 +60,10 @@ ret
 man_entity_find_first_free::
     ld hl, info_cmps_start
     ld de, SIZEOF_INFO_CMP
-    
+
     .check_if_free:
         ld a, l
-        cp (SIZEOF_ARRAY_CMP - NUM_OBJECTS * SIZEOF_INFO_CMP)
+        cp SIZEOF_ARRAY_CMP - NUM_OBJECTS * SIZEOF_INFO_CMP
         jr z, .exit
 
         ld a, CMP_FREE

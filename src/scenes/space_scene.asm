@@ -5,21 +5,23 @@ section "Space Scene Entities", rom0
 section "Space Scene", ROM0
 
 space_scene_init::
-    ; Set palette
+
+    call start_internal_ui_variables
+
     call wait_vblank
+    call lcd_off
+
     ld a, DEFAULT_PAL
     call set_palettes
     ; Load animations variables
-    call wait_vblank
     call animations_init
     call movements_init
-
-    call lcd_off
 
     ; Load tiles into VRAM
     call load_entities_tiles
     call load_background_tiles
     call load_ui_tiles
+    call load_objects_tiles
 
     call print_initials_maps
     call move_background_window_bottom
@@ -32,16 +34,19 @@ space_scene_init::
     ; Load entities
     call penguin_entity_init
     call lcd_on
+
+    call active_time_interruption
 ret
 
 ; Scene/Game loop
 space_scene_run::
     call wait_vblank
     call man_entity_draw
-    call get_pad_input
-    call move
-    call animate
-    call check_enemies_movement
+    call get_pad_input ; Returns b, don't touch it
+    call move ; Uses b
+    call animate ; Uses b
+    call enemies_movement
+    call animate_object
 jr space_scene_run
 
 ; Copy entities sprites to OAM
@@ -54,12 +59,12 @@ ret
 
 ; Copy LIVE entities sprites to OAM
 man_entity_draw:
-    ; call memcpy256_sprites_only_alive
-
+    di
     ld hl, sprite_cmps_start
     ld de, OAM_START
     ld b, SIZEOF_ARRAY_CMP
     call memcpy256
+    ei
 ret
 
 ;; -------------------------------------------------
@@ -82,8 +87,16 @@ ret
 load_ui_tiles::
     ld hl, ui_tiles
     ld de, $8840
-    ld bc, 50 * 16
+    ld bc, 58*16
     call memcpy65536
+ret
+
+load_objects_tiles::
+    ld hl, objects_tiles
+    ld de, $8BE0
+    ld b, 16 * 8
+    call memcpy256
+ret
 
 ;; -------------------------------------------------
 ;  MAPS
@@ -193,8 +206,9 @@ generate_random_enemy:
         ld bc, windmill_entity
         jr .continue
 
-    .continue
-        call generate_random_x_entity   
+    .continue:
+        call wait_vblank
+        call generate_random_x_entity
 ret
 
 ; Generate a new enemy
@@ -210,7 +224,7 @@ generate_random_x_entity:
     call set_entity_as_enemy
     
     ; Sprite component
-    
+    push hl
     ld h, CMP_SPRITE_H    ; Man-entity destination address
     
     xor a
@@ -251,6 +265,7 @@ generate_random_x_entity:
 
     ;; Physics component
 
+    pop hl
     ld h, CMP_PHYSICS_H
 
     .physics:
@@ -266,8 +281,7 @@ generate_random_x_entity:
         inc bc
 
         ld a, [bc]
-        ld [hl+], a
-        inc bc             
+        ld [hl], a            
 
 ret
 
@@ -289,4 +303,86 @@ penguin_entity_init::
     ld hl, (penguin_entity + SIZEOF_SPRI_CMP)
     ld b, SIZEOF_PHYS_CMP
     call memcpy256
+ret
+
+dead::
+    ld hl, $C103
+    set 6, [hl]
+    ld hl, $C107
+    set 6, [hl]
+    call wait_vblank
+    call man_entity_draw
+    call wait_vblank
+    di
+    halt
+ret
+
+;; ------------------------------------------------
+;  OBJECTS
+generate_x_random_object::
+
+    ld bc, clock_object
+
+    call man_object_alloc
+    ret nz ; No free object found
+
+    ld h, CMP_SPRITE_H
+
+    push hl
+
+    xor a
+    ld [hl+], a            ; y position
+
+    call random_position
+    ld [hl+], a
+    ld d, a                ; x position
+
+    ld e, SIZEOF_SPRI_CMP  ; Tile and properties
+    sra e
+    dec e
+    dec e
+    .loop_sprite_left:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_sprite_left
+
+    xor a
+    ld [hl+], a
+
+    ld a, d
+    add 8
+    ld [hl+], a             ; x position (again, for right sprite)
+    
+    ld e, SIZEOF_SPRI_CMP   ; Tile and properties
+    sra e
+    dec e
+    dec e
+    .loop_sprite_right:
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+        dec e
+    jr nz, .loop_sprite_right
+
+    ;; Physics component
+
+    pop hl
+    ld h, CMP_PHYSICS_H
+
+    .physics:
+
+        xor a
+        ld [hl+], a
+
+        ld a, d
+        ld [hl+], a
+
+        ld a, [bc]
+        ld [hl+], a
+        inc bc
+
+        ld a, [bc]
+        ld [hl], a
 ret
