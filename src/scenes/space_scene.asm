@@ -67,6 +67,12 @@ man_entity_draw:
     ei
 ret
 
+move_scene_down:
+    call move_background
+    ld hl, move_entity_down
+    call man_entity_for_each_not_penguin
+ret
+
 ;; -------------------------------------------------
 ;  TILES
 

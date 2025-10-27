@@ -162,6 +162,16 @@ check_colliding_entities_with_penguin::
     pop bc
 ret
 
+;; Checks if penguin collides and dies
+;;
+;; INPUT:
+;;      a -> Actual movement being performed
+check_penguin_collides_and_dies::
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, kill_penguin
+ret
+
 ;; Applies a given function to all entities but the penguin
 ;;
 ;; INPUT

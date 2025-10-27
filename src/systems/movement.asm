@@ -19,11 +19,11 @@ section "Movement", ROM0
 ;; INPUT:
 ;;      b -> DPAD input, 0 == pressed
 move::
+
     ; Performs jump and disables down if necessary
     call check_penguin_jump_movement
 
-    ; Decode D-PAD input
-
+    ; Decode D-PAD inputs
     .up:
         ld a, [last_input]
         bit PADB_A, a
@@ -41,19 +41,22 @@ move::
         ld a, [last_input]
         bit PADB_B, a
         jr nz, .not_stomping
-
         ; When down pressed, check remaining dashes
         ld a, [internal_dash_counter]
         cp 0
         jr z, .not_stomping
-
+        ; If requirements satisfied, call stomp
         call check_stomp
     ret
 
+
     .not_stomping:
+        ; Set not stomping
         xor a
         ld [stomping], a
+        ; Call gravity
         call gravity
+
 ret
 
 ;; Initialize movement variables
@@ -135,39 +138,62 @@ ret
 
 ;; ---------------------------------------------------
 ;; CHECK PENGUIN MOVES
+;; ---------------------------------------------------
+;;
+;; General structure:
+;;      1. Check entities collisions
+;;      2. Check wall collisions
+;;      3. Move penguin if adequate
+;;
 
+;; Performs right movement if possible
+;; Equivalent to the left one
 check_move_penguin_right:
     ; Check other entities collision
     ld a, RIGHT
-    ld [actual_movement], a
-    call check_colliding_entities_with_penguin
-    call c, kill_penguin
-
+    call check_penguin_collides_and_dies
     ; Check wall collision
     ld a, [LEFT_PENGUIN_X]
     cp RIGHT_WALL_PIXEL
     ret z
-
     ; Move penguin
     ld de, PENGUIN_INFO_CMPS
     call move_entity_right
 ret
 
+;; Performs left movement if possible
+;; Equivalent to the right one
 check_move_penguin_left:
     ; Check other entities collision
     ld a, LEFT
-    ld [actual_movement], a
-    call check_colliding_entities_with_penguin
-    call c, kill_penguin
-
+    call check_penguin_collides_and_dies
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_X]
     cp LEFT_WALL_PIXEL
     ret z
-
     ; Move penguin
     ld de, PENGUIN_INFO_CMPS
     call move_entity_left
+ret
+
+check_move_penguin_up:
+    ; Check other entities collision
+    ld a, UP
+    call check_penguin_collides_and_dies
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp UP_WALL_PIXEL
+    ret z
+    ; Move penguin or scene if middle of screen reached
+    ld a, [LEFT_PENGUIN_Y]
+    cp MIDDLE_SCREEN_Y_PIXELS
+    jr nc, .move_penguin_not_scene
+    .move_scene_not_penguin:
+        call move_scene_down
+        ret
+    .move_penguin_not_scene:
+        ld de, PENGUIN_INFO_CMPS
+        call move_entity_up
 ret
 
 check_move_penguin_down:
@@ -176,53 +202,23 @@ check_move_penguin_down:
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
     jr nc, .no_enemy_killed
-    call kill_entity
-    ; Start jump animation
-    ld a, DEFAULT_JUMP_HEIGHT
-    ld [jump_remaining_height], a
-    ; Increase dash counter
-    call inc_dash_counter
-
-    ret
-
+    .enemy_killed:
+        ; Kill corresponding entity
+        call kill_entity
+        ; Start jump animation
+        ld a, DEFAULT_JUMP_HEIGHT
+        ld [jump_remaining_height], a
+        ; Increase dash counter
+        call inc_dash_counter
+        ret
     .no_enemy_killed:
-
-    ; Check collision with wall
-    ld a, [LEFT_PENGUIN_Y]
-    cp DOWN_WALL_PIXEL
-    call z, kill_penguin
-
-    ; Move penguin
-    ld de, PENGUIN_INFO_CMPS
-    call move_entity_down
-ret
-
-check_move_penguin_up:
-    ; Check other entities collision
-    ld a, UP
-    ld [actual_movement], a
-    call check_colliding_entities_with_penguin
-    call c, kill_penguin
-
-    ; Check collision with wall
-    ld a, [LEFT_PENGUIN_Y]
-    cp UP_WALL_PIXEL
-    ret z
-
-    ; Check middle of screen reached to make tilemap go up
-    ld a, [LEFT_PENGUIN_Y]
-    cp MIDDLE_SCREEN_Y_PIXELS
-    jr c, .move_scene_down
-
-    ; Move penguin
-    ld de, PENGUIN_INFO_CMPS
-    call move_entity_up
-    ret
-
-    .move_scene_down:
-        call move_background
-        ld hl, move_entity_down
-        call man_entity_for_each_not_penguin
+        ; Check collision with wall
+        ld a, [LEFT_PENGUIN_Y]
+        cp DOWN_WALL_PIXEL
+        call z, kill_penguin
+        ; Move penguin
+        ld de, PENGUIN_INFO_CMPS
+        call move_entity_down
 ret
 
 ;; ---------------------------------------------------
