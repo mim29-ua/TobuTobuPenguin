@@ -15,7 +15,7 @@ ret
 ;; Performs the corresponding animations for each game loop
 animate::
     ld a, [last_input]
-    bit PADB_DOWN, a
+    bit PADB_B, a
     jr z, .falling
 
     .not_falling:

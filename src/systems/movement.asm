@@ -3,6 +3,7 @@ include "constants.inc"
 section "Movement Variables", WRAM0
 
 jump_remaining_height: ds 1
+stomping: ds 1
 
 section "Movement", ROM0
 
@@ -18,33 +19,48 @@ section "Movement", ROM0
 ;; INPUT:
 ;;      b -> DPAD input, 0 == pressed
 move::
-    ; Decode D-PAD input
-    ld a, [last_input]
-    bit PADB_DOWN, a
-    call z, check_move_penguin_down
-    ld a, [last_input]
-    bit PADB_UP, a
-    call z, check_move_penguin_up
-    ld a, [last_input]
-    bit PADB_LEFT, a
-    call z, check_move_penguin_left
-    ld a, [last_input]
-    bit PADB_RIGHT, a
-    call z, check_move_penguin_right
-
+    ; Performs jump and disables down if necessary
     call check_penguin_jump_movement
 
-    ; Gravity (not applies if UP pressed)
-    ld a, [last_input]
-    bit PADB_UP, a
-    ret z
-    call check_move_penguin_down
+    ; Decode D-PAD input
+
+    .up:
+        ld a, [last_input]
+        bit PADB_A, a
+        call z, check_move_penguin_up
+    .left:
+        ld a, [last_input]
+        bit PADB_LEFT, a
+        call z, check_move_penguin_left
+    .right:
+        ld a, [last_input]
+        bit PADB_RIGHT, a
+        call z, check_move_penguin_right
+    .down:
+        ; Check down pressed
+        ld a, [last_input]
+        bit PADB_B, a
+        jr nz, .not_stomping
+
+        ; When down pressed, check remaining dashes
+        ld a, [internal_dash_counter]
+        cp 0
+        jr z, .not_stomping
+
+        call check_stomp
+    ret
+
+    .not_stomping:
+        xor a
+        ld [stomping], a
+        call gravity
 ret
 
 ;; Initialize movement variables
 movements_init::
     xor a
     ld [jump_remaining_height], a
+    ld [stomping], a
 ret
 
 ;; Makes penguin jump or not
@@ -62,10 +78,59 @@ check_penguin_jump_movement:
 
     ; Tweak inputs
     ld a, [last_input]
-    res PADB_UP, a ; Perform jump    
-    set PADB_DOWN, a ; Disable going down
+    res PADB_A, a ; Perform jump    
+    set PADB_B, a ; Disable going down
     ld [last_input], a
     call check_move_penguin_up
+ret
+
+;; Applies gravity to the penguin
+gravity:
+    ; Don't apply if UP pressed
+    ld a, [last_input]
+    bit PADB_A, a
+    ret z
+
+    ; Don't apply if stomping
+    ld a, [stomping]
+    cp 1
+    ret z
+
+    ; Check other entities collision
+    ld a, DOWN
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    jr nc, .continue
+    ; Start jump animation
+    ld a, DEFAULT_JUMP_HEIGHT
+    ld [jump_remaining_height], a
+    ret
+
+    .continue:
+
+    ; Check collsision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp DOWN_WALL_PIXEL
+    call z, kill_penguin
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_down
+ret
+
+check_stomp:
+    ; If dashes remaining, check if I was already stomping
+    ld a, [stomping]
+    cp 0
+    call z, dec_dash_counter
+
+    ; Set stomping
+    ld a, 1
+    ld [stomping], a
+
+    ; Stomp
+    call check_move_penguin_down
+    call check_move_penguin_down
 ret
 
 ;; ---------------------------------------------------
@@ -112,22 +177,24 @@ check_move_penguin_down:
     call check_colliding_entities_with_penguin
     jr nc, .no_enemy_killed
     call kill_entity
+    ; Start jump animation
     ld a, DEFAULT_JUMP_HEIGHT
     ld [jump_remaining_height], a
+    ; Increase dash counter
+    call inc_dash_counter
+
+    ret
 
     .no_enemy_killed:
 
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
     cp DOWN_WALL_PIXEL
-    call z, .dead
+    call z, kill_penguin
 
     ; Move penguin
     ld de, PENGUIN_INFO_CMPS
     call move_entity_down
-    ret
-    .dead:
-        call kill_penguin
 ret
 
 check_move_penguin_up:
@@ -148,7 +215,6 @@ check_move_penguin_up:
     jr c, .move_scene_down
 
     ; Move penguin
-    call dec_dash_counter
     ld de, PENGUIN_INFO_CMPS
     call move_entity_up
     ret
@@ -188,8 +254,7 @@ ret
 
 ;; ---------------------------------------------------
 ;; MOVE ENTITIES
-
-;; Move one entity up
+;; ---------------------------------------------------
 ;;
 ;; INPUT:
 ;;      de -> Entity INFO component address
@@ -209,11 +274,6 @@ move_entity_up::
     ld e, a
     call dec_de_contents
 ret
-
-;; Move one entity down
-;;
-;; INPUT:
-;;      de -> Entity INFO component address
 move_entity_down::
     ; Move to corresponding SPRITE component
     ld d, CMP_SPRITE_H
@@ -230,11 +290,6 @@ move_entity_down::
     ld e, a
     call inc_de_contents
 ret
-
-;; Move one entity right
-;;
-;; INPUT:
-;;      de -> Entity INFO component address
 move_entity_right::
     ; Move to corresponding SPRITE component
     ld d, CMP_SPRITE_H
@@ -251,11 +306,6 @@ move_entity_right::
     ld e, a
     call inc_de_contents
 ret
-
-;; Move one entity left
-;;
-;; INPUT:
-;;      de -> Entity INFO component address
 move_entity_left::
     ; Move to corresponding SPRITE component
     ld d, CMP_SPRITE_H
