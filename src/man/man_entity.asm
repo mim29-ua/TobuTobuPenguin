@@ -361,9 +361,6 @@ kill_penguin::
     ld hl, OAM_PENGUIN_RIGHT_SPRITE_PROPIERTIES
     set SPRRITES_ATTRIBUTES_BIT_Y_FLIP, [hl]
 
-    call wait_vblank
-
-    di
-    halt
+    call press_to_start
 ret
 

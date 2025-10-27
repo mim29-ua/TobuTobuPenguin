@@ -32,6 +32,7 @@ ret
 ;;
 ;; OUTPUT:
 ;;      last_input -> All pad inputs together. Ex. (D-PAD) -> 1011, (BTN) -> 1110
+;;      b -> All pad inputs together. Ex. (D-PAD) -> 1011, (BTN) -> 1110
 get_pad_input::
     ; Read the D-PAD
     ld a, P1F_GET_DPAD
@@ -53,3 +54,9 @@ get_pad_input::
     ld [last_input], a
 ret
 
+press_to_start::
+    call get_pad_input
+    cp $FF
+    call nz, main
+    jr press_to_start
+ret
