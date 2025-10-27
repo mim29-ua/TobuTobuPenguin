@@ -228,6 +228,14 @@ set_entity_as_penguin::
     set CMP_BIT_PENGUIN, [hl]
 ret
 
+;; Sets the object bit of the given entity
+;;
+;; INPUT:
+;;      hl -> Entity INFO component start address
+set_entity_as_object::
+    set CMP_BIT_OBJECT, [hl]
+ret
+
 ;; ---------------------------------------------------
 ;; MEMORY MANAGEMENT
 ;; ---------------------------------------------------

@@ -147,6 +147,7 @@ def CMP_BIT_PHYSICS equ 5
 def CMP_BIT_RENDER equ 4
 def CMP_BIT_ENEMY equ 3 ; Determines if the entity is enemy or not
 def CMP_BIT_PENGUIN equ 2 ; Determines if the entity is penguin or not
+def CMP_BIT_OBJECT equ 1 ; Determines if the entity is object or not
 
 ; Entity Manager
 def NUM_ENTITIES equ 10
