@@ -34,6 +34,11 @@ def RIGHT equ 3
 def DIRECTIONAL_PIXELS_OFFSET equ 16
 def NON_DIRECTIONAL_PIXELS_OFFSET equ 15
 
+; internal_energy_counter
+def DEFAULT_ENERGY_COUNTER_INC equ 7
+def MAX_ENERGY_COUNTER equ 7
+def DEFAULT_CYCLES_BEFORE_ENERGY_DEC equ 40
+
 ; ---------------------------------------------------
 ; BACKGROUND
 

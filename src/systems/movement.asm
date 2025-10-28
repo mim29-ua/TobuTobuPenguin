@@ -4,6 +4,7 @@ section "Movement Variables", WRAM0
 
 jump_remaining_height: ds 1
 stomping: ds 1
+amount_of_cycles_before_energy_dec: ds 1
 
 section "Movement", ROM0
 
@@ -64,6 +65,9 @@ movements_init::
     xor a
     ld [jump_remaining_height], a
     ld [stomping], a
+
+    ld a, DEFAULT_CYCLES_BEFORE_ENERGY_DEC
+    ld [amount_of_cycles_before_energy_dec], a
 ret
 
 ;; Makes penguin jump or not
@@ -184,16 +188,29 @@ check_move_penguin_up:
     ld a, [LEFT_PENGUIN_Y]
     cp UP_WALL_PIXEL
     ret z
+
+    ; Check if flying remaining
+    ld a, [internal_energy_counter]
+    cp 0
+    jr nz, .check_if_move_penguin_or_scene
+    call check_move_penguin_down
+    ret
+
     ; Move penguin or scene if middle of screen reached
-    ld a, [LEFT_PENGUIN_Y]
-    cp MIDDLE_SCREEN_Y_PIXELS
-    jr nc, .move_penguin_not_scene
+    .check_if_move_penguin_or_scene:
+        ld a, [LEFT_PENGUIN_Y]
+        cp MIDDLE_SCREEN_Y_PIXELS
+        jr nc, .move_penguin_not_scene
     .move_scene_not_penguin:
         call move_scene_down
-        ret
+        jr .dec_energy_counter_and_exit
     .move_penguin_not_scene:
         ld de, PENGUIN_INFO_CMPS
         call move_entity_up
+
+    ; Executed if penguin or background moved
+    .dec_energy_counter_and_exit:
+        call check_dec_energy_counter
 ret
 
 check_move_penguin_down:
@@ -210,6 +227,8 @@ check_move_penguin_down:
         ld [jump_remaining_height], a
         ; Increase dash counter
         call inc_dash_counter
+        ; Increase energy counter
+        call inc_energy_counter
         ret
     .no_enemy_killed:
 

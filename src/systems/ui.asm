@@ -169,7 +169,16 @@ inc_energy_counter::
     ld a, [hl]
     cp 7
     ret z
-    inc [hl]
+    
+    ; Incs energy counter the defined amount
+    ld a, [internal_energy_counter]
+    add DEFAULT_ENERGY_COUNTER_INC
+    cp MAX_ENERGY_COUNTER
+    jr c, .not_maxed
+    ld a, MAX_ENERGY_COUNTER
+    .not_maxed: 
+    ld [hl], a
+
     call update_energy_counter_sprite
 ret
 
@@ -180,6 +189,21 @@ dec_energy_counter::
     ret z
     dec [hl]
     call update_energy_counter_sprite
+ret
+
+;; Checks if energy counter has to be decreased
+check_dec_energy_counter::
+    ; Check variable
+    ld a, [amount_of_cycles_before_energy_dec]
+    dec a
+    ld [amount_of_cycles_before_energy_dec], a
+    cp 0
+    ret nz
+    ; Restart variable
+    ld a, DEFAULT_CYCLES_BEFORE_ENERGY_DEC
+    ld [amount_of_cycles_before_energy_dec], a
+    ; Decrease energy counter
+    call dec_energy_counter
 ret
 
 update_energy_counter_sprite::
