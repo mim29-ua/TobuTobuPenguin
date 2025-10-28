@@ -189,10 +189,10 @@ def TIMER_CONTROL_ADDR equ $FF07
 def FIRST_CLOCK_SPRITE_ADDR equ $FE50
 def FIRST_DASHES_COUNTER_SPRITE_ADDR equ $FE60
 def UI_COORD_X_INITIAL equ 152
+def ENERGY_SPRITE_ADDR equ $FE68
 
 ;; ---------------------------------------------------
 ;; OBJECTS
 
 def OBJECT_INFO_ADDR equ $C048
-def CLOCK_INITIAL_TILE equ $BE
-def ENERGY_SPRITE_ADDR equ $FE68
+def CLOCK_INITIAL_TILE equ $D0

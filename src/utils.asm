@@ -13,49 +13,118 @@ wait_vblank::
 ret
 
 move_background::
-    ld hl, BACKGROUND_VIEWPORT_Y_ADDR
+    ld hl, internal_scrolll_counter
     ld a, [hl]
+    dec a
     cp 0
-
-    jr z, .change_tilemap ; Reduce only if not at top
-        dec [hl]
-        ret
-
-    .change_tilemap:
-        call generate_random_enemy
-        call generate_x_random_object
-
-        ld hl, rLCDC
-        bit 3, [hl]
+    jr nz, .no_reset
+        ld a, 9
+        ld [hl], a
+        call add_new_row_to_background
         
-        jr nz, .change_maps
-        call change_vram_tilemap
-        ret
+        ld hl, internal_enemy_creation_counter
+        ld a, [hl]
+        dec a
+        cp 0
+        jr nz, .no_reset_enemy_counter
+            push hl
+            ld hl, internal_enemy_distance
+            ld a, [hl]
+            pop hl
+            ld [hl], a
+            call generate_random_enemy
+            ret
 
-        .change_maps:
-            ld a, %10110100
-            call set_palettes_47_48
-            call lcd_off
-                call print_finals_map
-                call change_vram_tilemap
-            call lcd_on
+        .no_reset_enemy_counter:
+        ld [hl], a
+        
+        cp 3
+        ret nz
+            call generate_x_random_object
+            
+        ret
+    
+    .no_reset:
+        ld [hl], a
+        ld hl, BACKGROUND_VIEWPORT_Y_ADDR
+        dec [hl]
 ret
 
-change_vram_tilemap::
-    call change_window_map
-    call move_background_window_bottom
+add_new_row_to_background::
+    
+    ; Get current background address
+    ld hl, internal_background_addr
+    ld a, [hl+]
+    ld d, a
+
+    ld a, [hl]
+    sub 18
+    ld e, a
+    jr nc, .no_carry
+        dec d
+    .no_carry:
+
+    ld bc, background_tiles_end
+    ld a, d
+    cp b
+    jr nz, .continue
+        ld a, e
+        cp c
+        ret z
+
+    .continue:
+
+    ld [hl], e
+    dec hl
+    ld [hl], d
+    push de
+
+    ; Copy new row to VRAM
+    ld hl, BACKGROUND_VIEWPORT_Y_ADDR
+    ld a, [hl]
+    srl a
+    srl a
+    srl a
+
+    cp 0
+    jr nz, .skip_reset
+        ld a, 31
+        jr .add_loop
+
+    .skip_reset:
+        dec a
+
+    .add_loop:
+    ld h, $98
+    ld l, 0
+    ld d, 0
+    ld e, $20
+    .loop:
+        cp 0
+        jr z, .end_loop
+
+        add hl, de
+
+        dec a
+    jr .loop
+
+    .end_loop:
+    
+    ld d, h
+    ld e, l ; de = destination in VRAM
+    pop hl  ; hl = source address
+    ld b, 18
+    call memcpy256_vblank
+
+    ld a, $22
+    ld b, 2
+    call print_row
 ret
 
 ; Move the background window down to bottom position
 move_background_window_bottom::
     ld a, 111
     ld [BACKGROUND_VIEWPORT_Y_ADDR], a
-ret
-
-change_window_map::
-    ld a, %00001000
-    xor [hl]
-    ld [hl], a
 ret
 
 ; Returns a random x-position
@@ -157,8 +226,7 @@ ret
 
 lcd_on::
     ld hl, rLCDC
-    ld a, $97
-    ld [hl], a
+    set 7, [hl]
     ei
 ret
 
@@ -190,9 +258,24 @@ enable_sprites::
 ret
 
 print_row::
-    ld [hl+], a
+    ld [de], a
+    inc de
     dec b
     jr nz, print_row
+ret
+
+enable_window::
+    ld a, [rLCDC]
+    set 6, a
+    set 5, a
+    ld [rLCDC], a
+
+    ld a, 0
+    ld [$FF4A], a ; Window Y position
+
+    ld a, UI_COORD_X_INITIAL - 1
+    ld [$FF4B], a ; Window X position
+
 ret
 
 print_column:

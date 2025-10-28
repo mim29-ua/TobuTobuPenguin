@@ -323,27 +323,27 @@ animate_object::
     jr z, .second_tile
     
     .first_tile:
-        ld a, $BE
+        ld a, CLOCK_INITIAL_TILE
         ld [hl], a
 
         ld a, l
         add CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
         ld l, a
 
-        ld a, $C0
+        ld a, CLOCK_INITIAL_TILE + 2
         ld [hl], a
     ret
     
     .second_tile:
 
-        ld a, $C2
+        ld a, CLOCK_INITIAL_TILE + 4
         ld [hl], a
 
         ld a, l
         add CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
         ld l, a
 
-        ld a, $C4
+        ld a, CLOCK_INITIAL_TILE + 6
         ld [hl], a
 ret
         

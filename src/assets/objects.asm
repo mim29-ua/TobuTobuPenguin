@@ -1,8 +1,10 @@
+include "constants.inc"
+
 section "Objects Configurations", ROM0
 
 clock_object::
-    db $BE, 16
-    db $C0, 16
+    db CLOCK_INITIAL_TILE, 16
+    db CLOCK_INITIAL_TILE + 2, 16
     db 0,0
     db 0,0 
 

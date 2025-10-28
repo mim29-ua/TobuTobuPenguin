@@ -120,8 +120,31 @@ ret
 load_ui_sprites::
     ld de, $FE50
     ld hl, ui_sprites
-    ld b, 20 * 4
+    ld b, 8 * 4
     call memcpy256
+ret
+
+load_ui_background_map::
+    ld hl, ui_tilemap
+    ld de, TMAP1
+    ld c, 18
+    .loop:
+        ld b, 2
+        call memcpy256
+
+        ld a, $20
+        add e
+        ld e, a
+        jr nc, .no_carry_l
+            inc d
+        .no_carry_l:
+
+        inc hl
+        inc hl
+
+        dec c
+    jr nz, .loop
+
 ret
 
 start_internal_ui_variables::
@@ -135,6 +158,93 @@ start_internal_ui_variables::
     ld hl, internal_dash_counter
     ld a, 3
     ld [hl], a
+
+    ld hl, internal_energy_counter
+    ld a, 7
+    ld [hl], a
+ret
+
+inc_energy_counter::
+    ld hl, internal_energy_counter
+    ld a, [hl]
+    cp 7
+    ret z
+    inc [hl]
+    call update_energy_counter_sprite
+ret
+
+dec_energy_counter::
+    ld hl, internal_energy_counter
+    ld a, [hl]
+    cp 0
+    ret z
+    dec [hl]
+    call update_energy_counter_sprite
+ret
+
+update_energy_counter_sprite::
+    
+    ld a, [hl]
+
+    cp 7
+    jr z, .seven_energy
+
+    cp 6
+    jr z, .six_energy
+
+    cp 5
+    jr z, .five_energy
+
+    cp 4
+    jr z, .four_energy
+
+    cp 3
+    jr z, .three_energy
+
+    cp 2
+    jr z, .two_energy
+
+    cp 1
+    jr z, .one_energy
+
+    jp .zero_energy
+
+    .seven_energy:
+        ld hl, first_energy_configuration
+        jp .copy_energy_configuration
+
+    .six_energy:
+        ld hl, second_energy_configuration
+        jp .copy_energy_configuration
+
+    .five_energy:
+        ld hl, third_energy_configuration
+        jp .copy_energy_configuration
+
+    .four_energy:
+        ld hl, fourth_energy_configuration
+        jp .copy_energy_configuration
+
+    .three_energy:
+        ld hl, fifth_energy_configuration
+        jp .copy_energy_configuration
+
+    .two_energy:
+        ld hl, sixth_energy_configuration
+        jp .copy_energy_configuration
+
+    .one_energy:
+        ld hl, seventh_energy_configuration
+        jp .copy_energy_configuration
+    
+    .zero_energy:
+        ld hl, eighth_energy_configuration
+        jp .copy_energy_configuration
+
+    .copy_energy_configuration:
+        ld de, ENERGY_SPRITE_ADDR
+        ld b, 2 * 4
+        call memcpy256_vblank
 ret
 
 inc_dash_counter::
@@ -153,18 +263,6 @@ dec_dash_counter::
     ret z
     dec [hl]
     call update_dash_counter_sprite
-ret
-
-dec_energy_counter::
-    ld hl, ENERGY_SPRITE_ADDR
-    inc l
-
-    ld a, [hl]
-    cp UI_COORD_X_INITIAL + 15
-    ret c
-
-    add 2
-    ld [hl], a
 ret
 
 update_dash_counter_sprite::

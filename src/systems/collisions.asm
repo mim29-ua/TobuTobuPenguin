@@ -156,6 +156,7 @@ are_boxes_colliding::
     ; We're getting the info cmp address,
     ; but we want the sprite cmp address
     ld b, CMP_SPRITE_H
+    ld c, 0
     ld d, CMP_SPRITE_H
 
     ; Check for y
