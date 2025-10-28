@@ -23,13 +23,16 @@ space_scene_init::
     call load_ui_tiles
     call load_objects_tiles
 
-    call print_initials_maps
+    ;call print_initials_maps
     call move_background_window_bottom
+    call load_ui_background_map
+    call enable_window
 
     ; Clear OAM and enable sprites
     call clear_oam
     call enable_sprites
     call load_ui_sprites
+    call print_initial_map
 
     ; Load entities
     call penguin_entity_init
@@ -75,6 +78,11 @@ load_entities_tiles::
     ld de, $8000
     ld bc, 546
     call memcpy65536
+    ld hl, internal_enemy_creation_counter
+    ld a, 4
+    ld [hl], a
+    ld hl, internal_enemy_distance
+    ld [hl], a
 ret
 
 load_background_tiles::
@@ -87,13 +95,13 @@ ret
 load_ui_tiles::
     ld hl, ui_tiles
     ld de, $8840
-    ld bc, 58*16
+    ld bc, 77 * 16
     call memcpy65536
 ret
 
 load_objects_tiles::
     ld hl, objects_tiles
-    ld de, $8BE0
+    ld de, $8D00
     ld b, 16 * 8
     call memcpy256
 ret
@@ -101,56 +109,66 @@ ret
 ;; -------------------------------------------------
 ;  MAPS
 
-print_initials_maps::
-    call print_first_map
-    call print_second_map
-ret
+print_initial_map::
+    
+    ld hl, internal_background_addr
+    ld de, initial_tilemap
 
-print_finals_map::
-    call print_third_map
-ret
+    ld [hl], d                          ; Guarda la dirección para saber donde seguir leyendo
+    inc hl
+    ld [hl], e
 
-print_first_map::
-    ld hl, TMAP0
-    ld de, primer_tilemap
-    ld bc, MAP_DIMENSION * MAP_DIMENSION
+    ld hl, initial_tilemap
+    ld de, $99A0
 
     call print_map
-ret
 
-print_second_map::
-    ld hl, TMAP1
-    ld de, segundo_tilemap
-    ld bc, MAP_DIMENSION * MAP_DIMENSION
-
-    call print_map
-ret
-
-print_third_map::
-    ld hl, TMAP0
-    ld de, tercer_tilemap
-    ld bc, MAP_DIMENSION * MAP_DIMENSION
-
-    call print_map
+    ld hl, internal_scrolll_counter
+        ld a, 8
+        ld [hl], a
 ret
 
 ; Input
 ;
-; hl -> VRAM direction where copy the map
-; de -> Source address
+; hl -> Source address of the map
+; de -> Destination address in VRAM
 ; bc -> Bytes number
 ;
 print_map::
-    .print_map_loop:
-        ld a, [de]
-        inc de
+    ld c, 19
 
-        ld [hl+], a
+    .loop
+        call print_row_map
 
-        dec bc
-        ld a, c
-        or b
-        jr nz, .print_map_loop
+        ld a, $12
+        add l
+        ld l, a
+        jr nc, .no_carry_l
+            inc h
+
+        .no_carry_l:
+        dec c
+    jr nz, .loop 
+ret
+
+; Input
+;
+; hl -> Source address
+; de -> VRAM direction where copy the row
+print_row_map::
+    ld b, 18
+    call memcpy256
+    
+    ld a, 18
+    add e
+    ld e, a
+    jr nc, .no_carry
+        inc d
+    
+    .no_carry:
+        ld a, $22
+        ld b, 14
+        call print_row
 ret
 
 ;; -------------------------------------------------

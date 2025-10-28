@@ -149,6 +149,7 @@ check_move_penguin_up:
 
     ; Move penguin
     call dec_dash_counter
+    call dec_energy_counter
     ld de, PENGUIN_INFO_CMPS
     call move_entity_up
     ret

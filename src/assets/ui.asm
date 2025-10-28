@@ -5,6 +5,7 @@ section "Internal UI Data", WRAM0
 internal_ui_clock: ds 1
 internal_active_clock_configuration: ds 1
 internal_dash_counter: ds 1
+internal_energy_counter: ds 1
 
 section "UI Assets", ROM0
 
@@ -85,6 +86,38 @@ zero_dashes_configuration::
     db 144, UI_COORD_X_INITIAL, $A4, 16
     db 144, UI_COORD_X_INITIAL + 8, $A6, 16
 
+first_energy_configuration::    ; 7/7
+    db 128, UI_COORD_X_INITIAL, $BE, 16
+    db 128, UI_COORD_X_INITIAL + 8, $B4, 16
+
+second_energy_configuration::   ; 6/7
+    db 128, UI_COORD_X_INITIAL, $C0, 16
+    db 128, UI_COORD_X_INITIAL + 8, $B4, 16
+
+third_energy_configuration::   ; 5/7
+    db 128, UI_COORD_X_INITIAL, $C2, 16
+    db 128, UI_COORD_X_INITIAL + 8, $B4, 16
+
+fourth_energy_configuration::  ; 4/7
+    db 128, UI_COORD_X_INITIAL, $C4, 16
+    db 128, UI_COORD_X_INITIAL + 8, $B4, 16
+
+fifth_energy_configuration::   ; 3/7
+    db 128, UI_COORD_X_INITIAL, $C6, 16
+    db 128, UI_COORD_X_INITIAL + 8, $C8, 16
+
+sixth_energy_configuration::   ; 2/7
+    db 128, UI_COORD_X_INITIAL, $C6, 16
+    db 128, UI_COORD_X_INITIAL + 8, $CA, 16
+
+seventh_energy_configuration:: ; 1/7
+    db 128, UI_COORD_X_INITIAL, $C6, 16
+    db 128, UI_COORD_X_INITIAL + 8, $CC, 16
+
+eighth_energy_configuration::  ; 0/7
+    db 128, UI_COORD_X_INITIAL, $C6, 16
+    db 128, UI_COORD_X_INITIAL + 8, $CE, 16
+
 ui_sprites::
 
     ; Clock - Left part
@@ -102,30 +135,34 @@ ui_sprites::
     db 144, UI_COORD_X_INITIAL + 8, $B2, 16
 
     ; Energy - Left part
-    db 129, UI_COORD_X_INITIAL + 1, $B4, 16
+    db 128, UI_COORD_X_INITIAL, $BE, 16
 
     ; Energy - Right part
-    db 129, UI_COORD_X_INITIAL + 8 + 1, $B4, 16
+    db 128, UI_COORD_X_INITIAL + 8, $B4, 16
 
-    ; UI - Left part
-    db 48, UI_COORD_X_INITIAL, $8C, 16
-    db 64, UI_COORD_X_INITIAL, $90, 16
-    db 80, UI_COORD_X_INITIAL, $90, 16
-    db 96, UI_COORD_X_INITIAL, $96, 16
-    db 112, UI_COORD_X_INITIAL, $9C, 16
-    db 128, UI_COORD_X_INITIAL, $A0, 16
-
-    ; UI - Right part
-    db 64, UI_COORD_X_INITIAL + 8, $92, 16
-    db 48, UI_COORD_X_INITIAL + 8, $8E, 16
-    db 80, UI_COORD_X_INITIAL + 8, $92, 16
-    db 96, UI_COORD_X_INITIAL + 8, $9A, 16
-    db 112, UI_COORD_X_INITIAL + 8, $9E, 16
-    db 128, UI_COORD_X_INITIAL + 8, $A2, 16
+ui_tilemap:
+    db $40, $40
+    db $40, $40
+    db $40, $40
+    db $87, $8B
+    db $8C, $8E
+    db $8D, $8F
+    db $90, $92
+    db $90, $92
+    db $90, $92
+    db $90, $92
+    db $90, $92
+    db $90, $92
+    db $9C, $9E
+    db $9D, $9F
+    db $40, $40
+    db $40, $40
+    db $40, $40
+    db $40, $40
 
 ui_tiles::
 
-    DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
+        DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
     DB $7F, $FF, $80, $80, $83, $83, $8F, $8F, $9F, $9F, $9F, $9F, $BF, $BF, $BF, $BF
     DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
     DB $7F, $FF, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
@@ -183,3 +220,21 @@ ui_tiles::
     DB $FF, $FF, $00, $00, $00, $00, $00, $00, $18, $18, $38, $38, $7C, $7C, $FC, $FC
     DB $80, $80, $C0, $C0, $E0, $E0, $F0, $F0, $F0, $F0, $C0, $C0, $00, $00, $FF, $FF
     DB $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $7F, $80, $FF, $FF, $FF, $FF, $FF, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $FF, $80, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $7F, $80
+    DB $1F, $80, $9F, $9F, $9F, $9F, $9F, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $9F, $80, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $1F, $80
+    DB $07, $80, $87, $87, $87, $87, $87, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $87, $80, $87, $87, $87, $87, $87, $87, $87, $87, $87, $87, $87, $87, $07, $80
+    DB $01, $80, $81, $81, $81, $81, $81, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $81, $80, $81, $81, $81, $81, $81, $81, $81, $81, $81, $81, $81, $81, $01, $80
+    DB $00, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80
+    DB $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $80, $00, $80
+    DB $7F, $00, $7F, $7F, $7F, $7F, $7F, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $7F, $00, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $00
+    DB $1F, $00, $1F, $1F, $1F, $1F, $1F, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $1F, $00, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $00
+    DB $07, $00, $07, $07, $07, $07, $07, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $07, $00, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $00
+    DB $01, $00, $01, $01, $01, $01, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    DB $01, $00, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $00

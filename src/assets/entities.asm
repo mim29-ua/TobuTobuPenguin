@@ -1,5 +1,10 @@
 include "constants.inc"
 
+section "Entities Variables", WRAM0
+
+internal_enemy_creation_counter: ds 1
+internal_enemy_distance: ds 1
+
 section "Sprites creation configurations", ROM0
 ; Sprite cmp (+0)
 ; y, x, tile, properties (Enemies don't use static x, they use a random x position. And y is always zero when created.)
