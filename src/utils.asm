@@ -358,6 +358,55 @@ check_min_max_x::
     ei
 ret
 
+; Inputs
+;
+; hl -> sprite-L Tile address
+flip_sprite_horizontally::
+    push de
+    push bc
+    ld de, CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
+
+    ld a, [hl]
+    ld c, a
+    push hl
+
+    add hl, de
+    ld a, [hl]
+    ld b, a
+    ld a, c
+    ld [hl+], a ; Change R tile
+
+    pop hl
+    ld a, b
+    ld [hl+], a ; Change L tile
+    
+    bit 5, [hl] ; Change flip bit
+    jr z, .set_flip_l
+        res 5, [hl]
+        jr .continue
+
+    .set_flip_l:
+        set 5, [hl]
+
+    .continue:
+    ld de, CMP_SPRI_R_ATRS - CMP_SPRI_L_ATRS
+    add hl, de
+
+    bit 5, [hl] ; Change flip bit
+    jr z, .set_flip_r
+        res 5, [hl]
+        jr .end
+
+    .set_flip_r:
+        set 5, [hl]
+    
+    .end:
+
+    pop bc
+    pop de
+ret
+
+
 active_time_interruption::
     ld a, [INTERRUPTIONS_ADDR]
     or %00000100

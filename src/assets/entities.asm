@@ -21,32 +21,32 @@ penguin_entity:
 ovni_entity:
     db $12, 16
     db $12, %00110000
-    db 0,0
-    db 0,0
+    db 0,0,0
+    db 0,0,0
 
 airship_entity:
     db $08, 16
     db $0A, 16
-    db 0,0
-    db 0,0
+    db 0,0,0
+    db 0,0,0
 
 ghost_entity:
     db $0C, 16
     db $0E, 16
-    db 0,0
-    db 0,0
+    db 1,0,0
+    db 1,0,0
 
 owl_entity:
     db $1A, 16
     db $1A, %00110000
-    db 0,0
-    db 0,0
+    db 0,0,0
+    db 0,0,0
 
 windmill_entity:
     db $1E, 16
     db $1E, %01110000
-    db 0,0
-    db 0,0
+    db 0,0,0
+    db 0,0,0
 
 section "Entities Assets", ROM0
 

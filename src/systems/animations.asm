@@ -122,10 +122,9 @@ check_enemy_type::
 
     .ghost_animation:
         ld b, GHOST_INITIAL_TILE + 2
-        dec hl
+        dec l
         call ghost_movement
-        inc hl
-        ld a, [hl]
+        inc l
         call two_frames_animation_only_right
     jr .exit
 
@@ -179,19 +178,29 @@ ret
 ; a  -> enemy tile
 ; b  -> enemy initial tile
 two_frames_animation_only_right::
+    ld h, CMP_SPRITE_H
     ld de, CMP_SPRI_R_TILE - CMP_SPRI_L_TILE
-    add hl, de
+    ld a, [hl]
+    push hl
+    cp GHOST_INITIAL_TILE
+    jr nz, .flipped
+        add hl, de
+    .flipped:
     ld a, [hl]
     cp b
     
     jr z, .first_frame
         ld a, b
         ld [hl], a      ; Right sprite
-    ret
+    jr .exit
 
     .first_frame:
         add 2
         ld [hl], a      ; Right sprite
+
+    .exit:
+        pop hl
+        add hl, de
 ret
 
 ; Input
@@ -209,7 +218,11 @@ airship_movement::
     jr z, .change_direction_to_left
 
     ld h, CMP_PHYSICS_H
-    bit 0, [hl]                 ; 0 = moving right - 1 = moving left
+    dec l
+    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
+    push af
+    inc l
+    pop af
     jr z, .move_right
     .move_left:
         call move_entity_left
@@ -220,14 +233,26 @@ airship_movement::
         ret
 
     .change_direction_to_right:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
         ld h, CMP_PHYSICS_H
+        dec l
         res 0, [hl]
+        inc l
         ld h, CMP_SPRITE_H
         jr .move_right
 
     .change_direction_to_left:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
         ld h, CMP_PHYSICS_H
+        dec l
         set 0, [hl]
+        inc l
         ld h, CMP_SPRITE_H
         jr .move_left
 ret
@@ -256,7 +281,11 @@ ghost_movement::
     jr z, .change_direction_to_left     ; At max x, go left
 
     ld h, CMP_PHYSICS_H
-    bit 0, [hl]                 ; 0 = moving right - 1 = moving left
+    dec l
+    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
+    push af
+    inc l
+    pop af
     jr z, .move_right
     .move_left:
         call move_entity_left
@@ -267,14 +296,26 @@ ghost_movement::
         ret
 
     .change_direction_to_right:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
         ld h, CMP_PHYSICS_H
+        dec l
         res 0, [hl]
+        inc l
         ld h, CMP_SPRITE_H
         jr .move_right
 
     .change_direction_to_left:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
         ld h, CMP_PHYSICS_H
+        dec l
         set 0, [hl]
+        inc l
         ld h, CMP_SPRITE_H
         jr .move_left
 ret

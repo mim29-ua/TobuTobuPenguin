@@ -269,6 +269,8 @@ generate_random_x_entity:
         dec e
     jr nz, .loop_sprite_left
 
+    ; Physics component
+
     xor a
     ld [hl+], a
 
@@ -294,8 +296,9 @@ generate_random_x_entity:
 
     .physics:
 
-        xor a
+        ld a, [bc]
         ld [hl+], a
+        inc bc
 
         ld a, d
         ld [hl+], a

@@ -226,36 +226,6 @@ check_move_penguin_down:
         call kill_penguin
 ret
 
-check_move_penguin_up:
-    ; Check other entities collision
-    ld a, UP
-    ld [actual_movement], a
-    call check_colliding_entities_with_penguin
-    call c, kill_penguin
-
-    ; Check collision with wall
-    ld a, [LEFT_PENGUIN_Y]
-    cp UP_WALL_PIXEL
-    ret z
-
-    ; Check middle of screen reached to make tilemap go up
-    ld a, [LEFT_PENGUIN_Y]
-    cp MIDDLE_SCREEN_Y_PIXELS
-    jr c, .move_scene_down
-
-    ; Move penguin
-    call dec_dash_counter
-    call dec_energy_counter
-    ld de, PENGUIN_INFO_CMPS
-    call move_entity_up
-    ret
-
-    .move_scene_down:
-        call move_background
-        ld hl, move_entity_down
-        call man_entity_for_each_not_penguin
-ret
-
 ;; ---------------------------------------------------
 ;; MOVE ENEMIES
 
