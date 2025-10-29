@@ -86,15 +86,20 @@ check_penguin_jump_movement:
     set PADB_B, a ; Disable going down
     ld [last_input], a
     ; Move penguin
-    call check_move_penguin_up_no_dec_energy_counter
+    call check_move_penguin_up_jump
 ret
 
 ;; Applies gravity to the penguin
 gravity:
-    ; Don't apply if UP pressed
+    ; Don't apply if UP pressed and energy remaining
+    ld a, [internal_energy_counter]
+    cp 0
+    jr z, .continue_checks
     ld a, [last_input]
     bit PADB_A, a
     ret z
+
+    .continue_checks:
 
     ; Don't apply if stomping
     ld a, [stomping]
@@ -196,7 +201,6 @@ check_move_penguin_up:
     ld a, [internal_energy_counter]
     cp 0
     jr nz, .check_if_move_penguin_or_scene
-    call check_move_penguin_down
     ret
 
     ; Move penguin or scene if middle of screen reached
@@ -216,7 +220,7 @@ check_move_penguin_up:
         call check_dec_energy_counter
 ret
 
-check_move_penguin_up_no_dec_energy_counter:
+check_move_penguin_up_jump:
     ; Check other entities collision
     ld a, UP
     call check_penguin_collides_and_dies
@@ -224,13 +228,6 @@ check_move_penguin_up_no_dec_energy_counter:
     ld a, [LEFT_PENGUIN_Y]
     cp UP_WALL_PIXEL
     ret z
-
-    ; Check if flying remaining
-    ld a, [internal_energy_counter]
-    cp 0
-    jr nz, .check_if_move_penguin_or_scene
-    call check_move_penguin_down
-    ret
 
     ; Move penguin or scene if middle of screen reached
     .check_if_move_penguin_or_scene:
@@ -273,6 +270,33 @@ check_move_penguin_down:
     ld de, PENGUIN_INFO_CMPS
     call move_entity_down
     ret
+    .dead:
+        call kill_penguin
+ret
+
+check_move_penguin_down_no_incs_no_kill:
+    ; Check other entities collision
+    ld a, DOWN
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    jr nc, .no_enemy_detected
+    .enemy_detected:
+        ; Start jump animation
+        ld a, DEFAULT_JUMP_HEIGHT
+        ld [jump_remaining_height], a
+        ret
+    .no_enemy_detected:
+
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp DOWN_WALL_PIXEL
+    call z, .dead
+
+    ; Move penguin
+    ld de, PENGUIN_INFO_CMPS
+    call move_entity_down
+    ret
+
     .dead:
         call kill_penguin
 ret
