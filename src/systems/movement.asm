@@ -78,17 +78,15 @@ check_penguin_jump_movement:
     ret z
 
     ; Decrease counter before performing jump
-    push hl
-    ld hl, jump_remaining_height
-    dec [hl]
-    pop hl
+    dec a
+    ld [jump_remaining_height], a
 
     ; Tweak inputs
     ld a, [last_input]
-    res PADB_A, a ; Perform jump    
     set PADB_B, a ; Disable going down
     ld [last_input], a
-    call check_move_penguin_up
+    ; Move penguin
+    call check_move_penguin_up_no_dec_energy_counter
 ret
 
 ;; Applies gravity to the penguin
@@ -102,6 +100,11 @@ gravity:
     ld a, [stomping]
     cp 1
     ret z
+
+    ; Don't apply if jumping
+    ld a, [jump_remaining_height]
+    cp 0
+    ret nz
 
     ; Check other entities collision
     ld a, DOWN
@@ -211,6 +214,35 @@ check_move_penguin_up:
     ; Executed if penguin or background moved
     .dec_energy_counter_and_exit:
         call check_dec_energy_counter
+ret
+
+check_move_penguin_up_no_dec_energy_counter:
+    ; Check other entities collision
+    ld a, UP
+    call check_penguin_collides_and_dies
+    ; Check collision with wall
+    ld a, [LEFT_PENGUIN_Y]
+    cp UP_WALL_PIXEL
+    ret z
+
+    ; Check if flying remaining
+    ld a, [internal_energy_counter]
+    cp 0
+    jr nz, .check_if_move_penguin_or_scene
+    call check_move_penguin_down
+    ret
+
+    ; Move penguin or scene if middle of screen reached
+    .check_if_move_penguin_or_scene:
+        ld a, [LEFT_PENGUIN_Y]
+        cp MIDDLE_SCREEN_Y_PIXELS
+        jr nc, .move_penguin_not_scene
+    .move_scene_not_penguin:
+        call move_scene_down
+        ret
+    .move_penguin_not_scene:
+        ld de, PENGUIN_INFO_CMPS
+        call move_entity_up
 ret
 
 check_move_penguin_down:
