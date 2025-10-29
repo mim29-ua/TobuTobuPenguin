@@ -85,7 +85,7 @@ load_entities_tiles::
     ld bc, 546
     call memcpy65536
     ld hl, internal_enemy_creation_counter
-    ld a, 4
+    ld a, ENEMY_INITIAL_DISTANCE
     ld [hl], a
     ld hl, internal_enemy_distance
     ld [hl], a
@@ -101,13 +101,13 @@ ret
 load_ui_tiles::
     ld hl, ui_tiles
     ld de, $8840
-    ld bc, 77 * 16
+    ld bc, 79 * 16
     call memcpy65536
 ret
 
 load_objects_tiles::
     ld hl, objects_tiles
-    ld de, $8D00
+    ld de, $8D20
     ld b, 16 * 8
     call memcpy256
 ret

@@ -70,6 +70,16 @@ add_new_row_to_background::
     jr nz, .continue
         ld a, e
         cp c
+        push af
+        push hl
+        ld hl, BACKGROUND_VIEWPORT_Y_ADDR
+        ld a, [hl]
+        cp 0
+        jr nz, .end
+            call level_up
+        .end:
+        pop hl
+        pop af
         ret z
 
     .continue:
