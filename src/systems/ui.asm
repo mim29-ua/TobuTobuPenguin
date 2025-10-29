@@ -144,6 +144,52 @@ load_ui_background_map::
 
         dec c
     jr nz, .loop
+ret
+
+level_up::
+    ld hl, internal_enemy_distance
+    ld a, [hl]
+    cp ENEMY_FINAL_DISTANCE
+    ret z
+    dec [hl]
+    call change_ui_background_map
+ret
+
+change_ui_background_map::
+    ld de, $9CA0
+    ld c, a
+    ld a, ENEMY_INITIAL_DISTANCE + 1
+    sub c
+    push af
+    ld c, 7
+    call wait_vblank
+    .loop:
+        pop af
+        push af
+        cp c
+        jr z, .marker
+            ld hl, progress_bar_ui_tilemap
+            ld b, 2
+            call memcpy256
+            jr .next_address
+
+        .marker:
+            ld hl, marker_ui_tilemap
+            ld b, 2
+            call memcpy256
+
+        .next_address:
+
+        ld a, $20
+        add e
+        ld e, a
+        jr nc, .no_carry_l
+            inc d
+        .no_carry_l:
+
+        dec c
+    jr nz, .loop
+    pop af
 
 ret
 
