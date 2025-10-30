@@ -23,35 +23,76 @@ animate::
     ret
 
     .falling:
+        ld hl, LEFT_PENGUIN_TILE_INDEX + (CMP_SPRI_L_ATRS - CMP_SPRI_L_TILE)
         call set_jumping_sprite
 ret
 
 ;; Sets the jumping sprite for the penguin
 set_jumping_sprite:
-    ; Checks if sprite is already set
-    ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp LEFT_PENGUIN_TILE_JUMPING
-    ret z
 
-    ; Set sprite
-    ld a, LEFT_PENGUIN_TILE_JUMPING
-    ld [LEFT_PENGUIN_TILE_INDEX], a
-    ld a, RIGHT_PENGUIN_TILE_JUMPING
-    ld [RIGHT_PENGUIN_TILE_INDEX], a
+    call is_sprite_flipped_horizontally
+    jr z, .set_normal_sprite
+
+    .set_flipped_sprite:
+
+        ; Checks if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp RIGHT_PENGUIN_TILE_JUMPING
+        ret z
+
+        ; Set sprite
+        ld a, RIGHT_PENGUIN_TILE_JUMPING
+        ld [LEFT_PENGUIN_TILE_INDEX], a
+        ld a, LEFT_PENGUIN_TILE_JUMPING
+        ld [RIGHT_PENGUIN_TILE_INDEX], a
+    ret
+
+    .set_normal_sprite:
+
+        ; Checks if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp LEFT_PENGUIN_TILE_JUMPING
+        ret z
+
+        ; Set sprite
+        ld a, LEFT_PENGUIN_TILE_JUMPING
+        ld [LEFT_PENGUIN_TILE_INDEX], a
+        ld a, RIGHT_PENGUIN_TILE_JUMPING
+        ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
 ;; Sets the idle sprite for the penguin
 set_idle_sprite:
-    ; Checks if sprite is already set
-    ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp LEFT_PENGUIN_TILE_IDLE
-    ret z
 
-    ; Set sprite
-    ld a, LEFT_PENGUIN_TILE_IDLE
-    ld [LEFT_PENGUIN_TILE_INDEX], a
-    ld a, RIGHT_PENGUIN_TILE_IDLE
-    ld [RIGHT_PENGUIN_TILE_INDEX], a
+    call is_sprite_flipped_horizontally
+    jr z, .set_normal_sprite
+
+    .set_flipped_sprite:
+
+        ; Checks if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp RIGHT_PENGUIN_TILE_IDLE
+        ret z
+
+        ; Set sprite
+        ld a, RIGHT_PENGUIN_TILE_IDLE
+        ld [LEFT_PENGUIN_TILE_INDEX], a
+        ld a, LEFT_PENGUIN_TILE_IDLE
+        ld [RIGHT_PENGUIN_TILE_INDEX], a
+    ret
+
+    .set_normal_sprite:
+
+        ; Checks if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp LEFT_PENGUIN_TILE_IDLE
+        ret z
+
+        ; Set sprite
+        ld a, LEFT_PENGUIN_TILE_IDLE
+        ld [LEFT_PENGUIN_TILE_INDEX], a
+        ld a, RIGHT_PENGUIN_TILE_IDLE
+        ld [RIGHT_PENGUIN_TILE_INDEX], a
 ret
 
 ;; Performs the flying animation (idle-jumping tiles swap)
@@ -60,21 +101,46 @@ flying_animation:
     dec [hl]
     ret nz
 
-    ; Check if sprite is already set
-    ld a, [LEFT_PENGUIN_TILE_INDEX]
-    cp LEFT_PENGUIN_TILE_IDLE
-    jr z, .set_jumping_sprite
+    ld hl, LEFT_PENGUIN_TILE_INDEX + (CMP_SPRI_L_ATRS - CMP_SPRI_L_TILE)
+    call is_sprite_flipped_horizontally
+    jr z, .set_normal_sprite
 
-    .set_idle_sprite:
-        call set_idle_sprite
-        jr .update_counter
+    .set_flipped_sprite:
 
-    .set_jumping_sprite:
-        call set_jumping_sprite
+        ; Check if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp RIGHT_PENGUIN_TILE_IDLE
+        jr z, .set_jumping_sprite_flipped
+
+        .set_idle_sprite_flipped:
+            call set_idle_sprite
+            jr .update_counter
+
+        .set_jumping_sprite_flipped:
+            call set_jumping_sprite
+            jr .update_counter
+
+    .set_normal_sprite:
+
+        ; Check if sprite is already set
+        ld a, [LEFT_PENGUIN_TILE_INDEX]
+        cp LEFT_PENGUIN_TILE_IDLE
+        jr z, .set_jumping_sprite
+
+        .set_idle_sprite:
+            call set_idle_sprite
+            jr .update_counter
+
+        .set_jumping_sprite:
+            call set_jumping_sprite
 
     .update_counter:
+        ld hl, flying_animation_counter
         ld [hl], ANIMATION_SPEED
 ret
+
+;; ------------------------------------
+;  ENEMY ANIMATION
 
 ; Check the enemy type and set the appropriate animation
 ;

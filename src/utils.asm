@@ -416,6 +416,17 @@ flip_sprite_horizontally::
     pop de
 ret
 
+; Check uf entity is flipped horizontally
+;
+; Input
+; hl -> sprite-L Attributes address
+;
+; Returns
+; z flag: not flipped
+; nz flag: flipped
+is_sprite_flipped_horizontally::
+    bit 5, [hl]
+ret
 
 active_time_interruption::
     ld a, [INTERRUPTIONS_ADDR]
