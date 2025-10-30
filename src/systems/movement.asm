@@ -163,6 +163,12 @@ check_move_penguin_right:
     ; Move penguin
     ld de, PENGUIN_INFO_CMPS
     call move_entity_right
+
+    ld hl, LEFT_PENGUIN_ATRS
+    call is_sprite_flipped_horizontally
+    ret nz
+    dec l
+    call flip_sprite_horizontally
 ret
 
 ;; Performs left movement if possible
@@ -178,6 +184,11 @@ check_move_penguin_left:
     ; Move penguin
     ld de, PENGUIN_INFO_CMPS
     call move_entity_left
+    ld hl, LEFT_PENGUIN_ATRS
+    call is_sprite_flipped_horizontally
+    ret z
+    dec l
+    call flip_sprite_horizontally
 ret
 
 check_move_penguin_up:
