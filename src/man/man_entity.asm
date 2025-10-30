@@ -86,10 +86,14 @@ ret
 man_entity_for_each::
     ld de, info_cmps_start
     .loop:
-        ; check_sentinel:
-        ld a, [de]
-        cp CMP_SENTINEL
+        ; Check not traspassing end of cmps memory section
+        ld a, e
+        cp SIZEOF_ARRAY_CMP
         ret z
+        ; Check reserved/alive entity
+        ld a, [de]
+        bit CMP_BIT_ALIVE, a
+        jr z, .next
         ; process:
         push de
         push hl
@@ -97,10 +101,12 @@ man_entity_for_each::
         ; return:
         pop hl
         pop de
-        ; next:
-        ld a, e
-        add SIZEOF_INFO_CMP
-        ld e, a
+        .next:
+            ld a, e
+            add SIZEOF_INFO_CMP
+            ld e, a
+            jr nc, .loop
+            inc d
     jr .loop
 ret
 

@@ -45,6 +45,7 @@ ret
 space_scene_run::
     call wait_vblank
     call man_entity_draw
+    call out_of_screen_entities_guard
     call get_pad_input ; Returns b, don't touch it
     call move ; Uses b
     call animate ; Uses b
@@ -68,6 +69,24 @@ man_entity_draw:
     ld b, SIZEOF_ARRAY_CMP
     call memcpy256
     ei
+ret
+
+;; Checks if an entity is out of display and kills it
+;;
+;; INPUT:
+;;      de -> Address of the entity to check
+check_if_out_of_display::
+    ld h, CMP_SPRITE_H
+    ld l, e
+    ld a, OUT_OF_SCREEN_Y
+    cp [hl]
+    call c, kill_entity
+ret
+
+;; Watches for and kills out-of-screen entities
+out_of_screen_entities_guard:
+    ld hl, check_if_out_of_display
+    call man_entity_for_each
 ret
 
 move_scene_down:

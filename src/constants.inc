@@ -39,6 +39,8 @@ def DEFAULT_ENERGY_COUNTER_INC equ 7
 def MAX_ENERGY_COUNTER equ 7
 def DEFAULT_CYCLES_BEFORE_ENERGY_DEC equ 40
 
+def OUT_OF_SCREEN_Y equ 160
+
 ; ---------------------------------------------------
 ; BACKGROUND
 
