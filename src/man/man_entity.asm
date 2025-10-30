@@ -189,10 +189,10 @@ man_entity_for_each_not_penguin::
         bit CMP_BIT_ALIVE, a
         jr z, .next
 
-        ; Check entity is not enemy
+        ; Check entity is not penguin
         ld a, [de]
-        bit CMP_BIT_ENEMY, a
-        jr z, .next
+        bit CMP_BIT_PENGUIN, a
+        jr nz, .next
 
         ; process:
         push de
