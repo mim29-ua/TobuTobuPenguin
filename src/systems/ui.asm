@@ -33,7 +33,15 @@ section "UI", ROM0
 update_sprite_clock::
     ld hl, internal_active_clock_configuration
     ld a, [hl]
-    call check_clock_configuration
+    cp 8
+    jr nz, .continue
+
+    call kill_penguin
+
+    .continue:
+        inc a
+        ld [hl], a
+        call check_clock_configuration
 ret
 
 ; Check the current clock configuration
@@ -41,9 +49,6 @@ ret
 ; INPUT:
 ; a -> current clock value (0-23)
 check_clock_configuration:
-
-    inc a
-    ld [hl], a
 
     cp 8
     jr z, .nineth_clock
@@ -115,6 +120,13 @@ check_clock_configuration:
         call memcpy256_vblank
 
     ld hl, internal_ui_clock
+ret
+
+restart_internal_active_clock_configuration::
+    ld hl, internal_active_clock_configuration
+    xor a
+    ld [hl], a
+    call check_clock_configuration
 ret
 
 load_ui_sprites::

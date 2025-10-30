@@ -162,14 +162,53 @@ check_colliding_entities_with_penguin::
     pop bc
 ret
 
-;; Checks if penguin collides and dies
+;; Checks if colliding with clock or enemy
 ;;
 ;; INPUT:
-;;      a -> Actual movement being performed
-check_penguin_collides_and_dies::
-    ld [actual_movement], a
-    call check_colliding_entities_with_penguin
-    call c, kill_penguin
+;;      de -> Entity INFO cmp address
+check_if_clock_or_death::
+    call check_if_entity_is_clock
+    jr nz, .clock
+
+    .death:
+        call kill_penguin
+    ret
+
+    .clock:
+        call kill_entity
+        call restart_internal_active_clock_configuration
+
+ret
+
+;; Checks if colliding with clock or enemy (jump)
+;;
+;; INPUT:
+;;      de -> Entity INFO cmp address
+check_if_clock_or_jump::
+    call check_if_entity_is_clock
+    jr nz, .clock
+
+    .jump:
+        ld a, DEFAULT_JUMP_HEIGHT
+        ld [jump_remaining_height], a
+    ret
+
+    .clock:
+        call kill_entity
+        call restart_internal_active_clock_configuration
+
+ret
+
+;; Checks if the the given entity is a clock
+;;
+;; INPUT:
+;;      de -> Entity INFO cmp address
+;; OUTPUT:
+;;      nz -> Colliding with clock
+;;      z  -> Not colliding with clock
+check_if_entity_is_clock::
+    ld a, [de]
+    bit CMP_BIT_OBJECT, a
 ret
 
 ;; Applies a given function to all entities but the penguin

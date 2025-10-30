@@ -353,6 +353,8 @@ generate_x_random_object::
     call man_object_alloc
     ret nz ; No free object found
 
+    call set_entity_as_object
+
     ld h, CMP_SPRITE_H
 
     push hl

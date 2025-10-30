@@ -116,9 +116,9 @@ gravity:
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
     jr nc, .continue
-    ; Start jump animation
-    ld a, DEFAULT_JUMP_HEIGHT
-    ld [jump_remaining_height], a
+
+    ; Checks if jump or clock
+    call check_if_clock_or_jump
     ret
 
     .continue:
@@ -163,7 +163,9 @@ ret
 check_move_penguin_right:
     ; Check other entities collision
     ld a, RIGHT
-    call check_penguin_collides_and_dies
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, check_if_clock_or_death
     ; Check wall collision
     ld a, [LEFT_PENGUIN_X]
     cp RIGHT_WALL_PIXEL
@@ -184,7 +186,9 @@ ret
 check_move_penguin_left:
     ; Check other entities collision
     ld a, LEFT
-    call check_penguin_collides_and_dies
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, check_if_clock_or_death
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_X]
     cp LEFT_WALL_PIXEL
@@ -202,7 +206,9 @@ ret
 check_move_penguin_up:
     ; Check other entities collision
     ld a, UP
-    call check_penguin_collides_and_dies
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, check_if_clock_or_death
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
     cp UP_WALL_PIXEL
@@ -234,7 +240,9 @@ ret
 check_move_penguin_up_jump:
     ; Check other entities collision
     ld a, UP
-    call check_penguin_collides_and_dies
+    ld [actual_movement], a
+    call check_colliding_entities_with_penguin
+    call c, check_if_clock_or_death
     ; Check collision with wall
     ld a, [LEFT_PENGUIN_Y]
     cp UP_WALL_PIXEL
