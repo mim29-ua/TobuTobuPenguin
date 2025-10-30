@@ -64,6 +64,9 @@ def OWL_INITIAL_TILE equ $1A
 
 def WINDMILL_INITIAL_TILE equ $1E
 
+def ENEMY_INITIAL_DISTANCE equ 9
+def ENEMY_FINAL_DISTANCE equ 2
+
 ; ---------------------------------------------------
 ; JOYPAD
 
@@ -200,4 +203,4 @@ def ENERGY_SPRITE_ADDR equ $FE68
 ;; OBJECTS
 
 def OBJECT_INFO_ADDR equ $C048
-def CLOCK_INITIAL_TILE equ $D0
+def CLOCK_INITIAL_TILE equ $D2
