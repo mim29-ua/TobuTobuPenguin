@@ -328,9 +328,11 @@ update_energy_counter_sprite::
         jp .copy_energy_configuration
 
     .copy_energy_configuration:
+        di
         ld de, ENERGY_SPRITE_ADDR
         ld b, 2 * 4
         call memcpy256_vblank
+        ei
 ret
 
 inc_dash_counter::
