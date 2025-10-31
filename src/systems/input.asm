@@ -66,6 +66,16 @@ ret
 press_start_to_start::
     call get_pad_input
     bit PADB_START, a
-    call z, main
+    jp z, reset
     jr press_start_to_start
 ret
+
+reset:
+    di
+    ld sp, $FFFE
+    xor a
+    ld [$FFFF], a     ; disable interrupts
+    ld [$FF0F], a
+    ; reset LCD, sound, timers, etc...
+    ; clear WRAM/VRAM
+    jp $0100
