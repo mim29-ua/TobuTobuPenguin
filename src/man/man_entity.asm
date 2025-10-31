@@ -215,6 +215,10 @@ check_if_clock_or_kill::
 
     .kill:
         ; Kill corresponding entity
+        ld h, d
+        ld l, e
+        bit CMP_BIT_NOT_KILLABLE_ENEMY, [hl]
+        jr nz, .kill_penguin
         call kill_entity
         ; Start jump animation
         ld a, DEFAULT_JUMP_HEIGHT
@@ -223,6 +227,10 @@ check_if_clock_or_kill::
         call inc_dash_counter
         ; Increase energy counter
         call inc_energy_counter
+    ret
+
+    .kill_penguin:
+        call kill_penguin
     ret
 
     .clock:
@@ -289,6 +297,15 @@ ret
 ;;      hl -> Entity INFO component start address
 set_entity_as_enemy::
     set CMP_BIT_ENEMY, [hl]
+ret
+
+;; Sets the enemy and not killable bits of the given entity
+;;
+;; INPUT:
+;;      hl -> Entity INFO component start address
+set_entity_as_not_killable_enemy::
+    set CMP_BIT_ENEMY, [hl]
+    set CMP_BIT_NOT_KILLABLE_ENEMY, [hl]
 ret
 
 ;; Sets the penguin bit of the given entity

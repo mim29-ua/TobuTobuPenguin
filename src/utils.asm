@@ -442,3 +442,17 @@ active_time_interruption::
     ld [TIMER_CONTROL_ADDR], a
 
 ret
+
+;; INPUT:
+;;      hl
+;;      bc
+;; OUTPUT:
+;;      z flag  -> hl == bc
+;;      nz flag -> hl != bc
+cp_hl_bc::
+    ld a, h
+    cp b
+    ret nz
+    ld a, l
+    cp c
+ret

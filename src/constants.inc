@@ -158,6 +158,7 @@ def CMP_BIT_RENDER equ 4
 def CMP_BIT_ENEMY equ 3 ; Determines if the entity is enemy or not
 def CMP_BIT_PENGUIN equ 2 ; Determines if the entity is penguin or not
 def CMP_BIT_OBJECT equ 1 ; Determines if the entity is object or not
+def CMP_BIT_NOT_KILLABLE_ENEMY equ 0 ; Determines if the entity, in case of being an enemy, can not be killed
 
 ; Entity Manager
 def NUM_ENTITIES equ 10

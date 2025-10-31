@@ -264,6 +264,11 @@ generate_random_x_entity:
     cp $FF
     ret z                 ; No free entity sprite
     call set_entity_as_enemy
+
+    push hl
+    call check_if_windmill
+    pop hl
+    call z, set_entity_as_not_killable_enemy
     
     ; Sprite component
     push hl
@@ -328,6 +333,18 @@ generate_random_x_entity:
         ld a, [bc]
         ld [hl], a            
 
+ret
+
+;; Checks if a given entity is a windmill
+;;
+;; INPUT:
+;;      bc -> Entity INFO cmp address
+;; OUTPUT:
+;;      z flag  -> hl == bc
+;;      nz flag -> hl != bc
+check_if_windmill::
+    ld hl, windmill_entity
+    call cp_hl_bc
 ret
 
 ;; -------------------------------------------------
