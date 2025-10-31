@@ -2,6 +2,7 @@ include "constants.inc"
 
 section "Animation Variables", WRAM0
 
+animation_counter: ds 1
 flying_animation_counter: ds 1 ; Game loops between tiles swaping when animating
 
 section "Animations", ROM0
@@ -10,10 +11,24 @@ section "Animations", ROM0
 animations_init::
     ld a, ANIMATION_SPEED
     ld [flying_animation_counter], a
+    ld a, ANIMATION_SPEED
+    ld [animation_counter], a
 ret
 
 ;; Performs the corresponding animations for each game loop
 animate::
+    ld hl, animation_counter
+    dec [hl]
+    jr nz, .rest_of_animations
+
+    call enemies_animation
+    call animate_object
+
+    ld hl, animation_counter
+    ld [hl], ANIMATION_SPEED
+
+    .rest_of_animations:
+
     ld a, [actual_movement]
     cp DOWN
     jr z, .falling

@@ -8,9 +8,6 @@ time_interruption_handler::
     push bc
     push de
     
-    call enemies_animation
-    call animate_object
-    
     ld hl, internal_ui_clock
     ld a, [hl]
     inc a
