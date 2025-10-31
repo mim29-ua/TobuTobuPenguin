@@ -118,7 +118,7 @@ gravity:
     jr nc, .continue
 
     ; Checks if jump or clock
-    call check_if_clock_or_jump
+    call check_if_clock_or_jump_or_death
     ret
 
     .continue:

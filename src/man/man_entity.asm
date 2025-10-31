@@ -205,6 +205,28 @@ check_if_clock_or_jump::
 
 ret
 
+;; Checks if colliding with clock or enemy (jump)
+;;
+;; INPUT:
+;;      de -> Entity INFO cmp address
+check_if_clock_or_jump_or_death::
+    call check_if_entity_is_clock
+    jr nz, .clock
+
+    call check_if_entity_is_not_killable_enemy
+    call nz, kill_penguin
+
+    .jump:
+        ld a, DEFAULT_JUMP_HEIGHT
+        ld [jump_remaining_height], a
+    ret
+
+    .clock:
+        call kill_entity
+        call restart_internal_active_clock_configuration
+
+ret
+
 ;; Checks if colliding with clock or enemy (kill it)
 ;;
 ;; INPUT:
@@ -249,6 +271,18 @@ ret
 check_if_entity_is_clock::
     ld a, [de]
     bit CMP_BIT_OBJECT, a
+ret
+
+;; Checks if the the given entity is not killable enemy
+;;
+;; INPUT:
+;;      de -> Entity INFO cmp address
+;; OUTPUT:
+;;      nz -> Colliding with enemy
+;;      z  -> Not colliding with enemy
+check_if_entity_is_not_killable_enemy::
+    ld a, [de]
+    bit CMP_BIT_NOT_KILLABLE_ENEMY, a
 ret
 
 ;; Applies a given function to all entities but the penguin
