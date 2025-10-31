@@ -1,7 +1,5 @@
 include "constants.inc"
 
-section "Space Scene Entities", rom0
-
 section "Space Scene", ROM0
 
 space_scene_init::
@@ -107,6 +105,9 @@ load_entities_tiles::
     ld [hl], a
     ld hl, internal_enemy_distance
     ld [hl], a
+    ld hl, previous_enemy_type
+    xor a
+    ld [hl], a
 ret
 
 load_background_tiles::
@@ -209,48 +210,63 @@ generate_random_enemy:
         jr .loop
     .end
 
-    cp 0
-    jr z, .ovni_enemy
+    .comprove_previous:
+    ld hl, previous_enemy_type
+    ld b, [hl]
+    cp b
+    jr nz, .continue_generation
+        cp ENEMIES_TYPES_NUMBER - 1
+        jr z, .decrement
+            inc a
+            jr .continue_generation
+        .decrement:
+            dec a
 
-    cp 1
-    jr z, .airship_enemy
+    .continue_generation:
+        cp 0
+        jr z, .ovni_enemy
 
-    cp 2
-    jr z, .ghost_enemy
+        cp 1
+        jr z, .airship_enemy
 
-    cp 3
-    jr z, .owl_enemy
+        cp 2
+        jr z, .ghost_enemy
 
-    cp 4
-    jr z, .windmill_enemy
+        cp 3
+        jr z, .owl_enemy
 
-    ret
+        cp 4
+        jr z, .windmill_enemy
 
-    .ovni_enemy
-        ld bc, ovni_entity
-        jr .continue
+        ret
 
-    .airship_enemy
-        ld bc, airship_entity
-        jr .continue
+        .ovni_enemy
+            ld bc, ovni_entity
+            jr .continue
 
-    .ghost_enemy
-        ld bc, ghost_entity
-        call generate_random_x_entity
-        call check_min_max_x
-    ret
+        .airship_enemy
+            ld bc, airship_entity
+            jr .continue
 
-    .owl_enemy
-        ld bc, owl_entity
-        jr .continue
-    
-    .windmill_enemy
-        ld bc, windmill_entity
-        jr .continue
+        .ghost_enemy
+            ld bc, ghost_entity
+            ld [hl], a ; Save previous enemy type
+            call generate_random_x_entity
+            call check_min_max_x
+        ret
 
-    .continue:
-        call wait_vblank
-        call generate_random_x_entity
+        .owl_enemy
+            ld bc, owl_entity
+            jr .continue
+        
+        .windmill_enemy
+            ld bc, windmill_entity
+            jr .continue
+
+        .continue:
+            ld [hl], a ; Save previous enemy type
+            call wait_vblank
+            call generate_random_x_entity
 ret
 
 ; Generate a new enemy

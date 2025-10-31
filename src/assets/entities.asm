@@ -2,6 +2,7 @@ include "constants.inc"
 
 section "Entities Variables", WRAM0
 
+previous_enemy_type: ds 1
 internal_enemy_creation_counter: ds 1
 internal_enemy_distance: ds 1
 
