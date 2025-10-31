@@ -205,6 +205,32 @@ check_if_clock_or_jump::
 
 ret
 
+;; Checks if colliding with clock or enemy (kill it)
+;;
+;; INPUT:
+;;      de -> Entity INFO cmp address
+check_if_clock_or_kill::
+    call check_if_entity_is_clock
+    jr nz, .clock
+
+    .kill:
+        ; Kill corresponding entity
+        call kill_entity
+        ; Start jump animation
+        ld a, DEFAULT_JUMP_HEIGHT
+        ld [jump_remaining_height], a
+        ; Increase dash counter
+        call inc_dash_counter
+        ; Increase energy counter
+        call inc_energy_counter
+    ret
+
+    .clock:
+        call kill_entity
+        call restart_internal_active_clock_configuration
+
+ret
+
 ;; Checks if the the given entity is a clock
 ;;
 ;; INPUT:

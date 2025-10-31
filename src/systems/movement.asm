@@ -267,28 +267,22 @@ check_move_penguin_down:
     ld [actual_movement], a
     call check_colliding_entities_with_penguin
     jr nc, .no_enemy_killed
+
     .enemy_killed:
-        ; Kill corresponding entity
-        call kill_entity
-        ; Start jump animation
-        ld a, DEFAULT_JUMP_HEIGHT
-        ld [jump_remaining_height], a
-        ; Increase dash counter
-        call inc_dash_counter
-        ; Increase energy counter
-        call inc_energy_counter
-        ret
-    .no_enemy_killed:
-
-    ; Check collision with wall
-    ld a, [LEFT_PENGUIN_Y]
-    cp DOWN_WALL_PIXEL
-    call z, .dead
-
-    ; Move penguin
-    ld de, PENGUIN_INFO_CMPS
-    call move_entity_down
+        call check_if_clock_or_kill
     ret
+
+    .no_enemy_killed:
+        ; Check collision with wall
+        ld a, [LEFT_PENGUIN_Y]
+        cp DOWN_WALL_PIXEL
+        call z, .dead
+
+        ; Move penguin
+        ld de, PENGUIN_INFO_CMPS
+        call move_entity_down
+    ret
+
     .dead:
         call kill_penguin
 ret
