@@ -38,7 +38,10 @@ move_background::
         .no_reset_enemy_counter:
         ld [hl], a
         
-        cp 3
+        ld hl, internal_enemy_distance
+        ld b, [hl]
+        sra b
+        cp b
         ret nz
             call generate_x_random_object
             

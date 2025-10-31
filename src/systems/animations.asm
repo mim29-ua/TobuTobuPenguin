@@ -139,6 +139,30 @@ flying_animation:
         ld [hl], ANIMATION_SPEED
 ret
 
+enemies_animation::
+    ld h, CMP_INFO_H
+    ld l, FIRST_ENEMIES_ADDR_L
+
+    .loop:
+        ld a, l
+        cp NUM_ENTITIES * SIZEOF_INFO_CMP - SIZEOF_INFO_CMP * NUM_OBJECTS
+        ret z
+
+        ld a, [hl]
+
+        bit CMP_BIT_ENEMY, a
+        jr z, .continue        ; Next iteration, if the position is free
+
+        call check_enemy_type_animation
+        jr .loop
+
+        .continue:              ; Next info component
+            ld a, l
+            add SIZEOF_INFO_CMP
+            ld l, a
+    jr .loop
+ret
+
 ;; ------------------------------------
 ;  ENEMY ANIMATION
 
@@ -147,7 +171,7 @@ ret
 ; Input
 ; a  -> enemy tile
 ; hl -> enemy tile address
-check_enemy_type::
+check_enemy_type_animation::
     ld h, CMP_SPRITE_H
     ld a, l
     add CMP_SPRI_L_TILE
@@ -168,7 +192,7 @@ check_enemy_type::
     jr nc, .ghost_animation
 
     cp AIRSHIP_INITIAL_TILE
-    jp nc, .airship_movement
+    jp nc, .airship_exit
 
     jp .exit
 
@@ -188,16 +212,8 @@ check_enemy_type::
 
     .ghost_animation:
         ld b, GHOST_INITIAL_TILE + 2
-        dec l
-        call ghost_movement
-        inc l
         call two_frames_animation_only_right
     jr .exit
-
-    .airship_movement:
-        dec hl
-        call airship_movement
-        inc hl
 
     .airship_exit:
         ld h, CMP_INFO_H
@@ -269,123 +285,6 @@ two_frames_animation_only_right::
         add hl, de
 ret
 
-; Input
-; hl -> enemy x address
-airship_movement::
-
-    ld d, CMP_INFO_H
-    ld e, l
-    dec de               ; de = enemy info component address
-
-    ld a, [hl]
-    cp LEFT_WALL_PIXEL
-    jr z, .change_direction_to_right
-    cp RIGHT_WALL_PIXEL
-    jr z, .change_direction_to_left
-
-    ld h, CMP_PHYSICS_H
-    dec l
-    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
-    push af
-    inc l
-    pop af
-    jr z, .move_right
-    .move_left:
-        call move_entity_left
-        ret
-
-    .move_right:
-        call move_entity_right
-        ret
-
-    .change_direction_to_right:
-        push hl
-        inc l
-        call flip_sprite_horizontally
-        pop hl
-        ld h, CMP_PHYSICS_H
-        dec l
-        res 0, [hl]
-        inc l
-        ld h, CMP_SPRITE_H
-        jr .move_right
-
-    .change_direction_to_left:
-        push hl
-        inc l
-        call flip_sprite_horizontally
-        pop hl
-        ld h, CMP_PHYSICS_H
-        dec l
-        set 0, [hl]
-        inc l
-        ld h, CMP_SPRITE_H
-        jr .move_left
-ret
-
-; Input
-; hl -> enemy x address
-ghost_movement::
-
-    ld d, CMP_INFO_H
-    ld e, l
-    dec de               ; de = enemy info component address
-
-    ld a, [hl]
-    ld c, a              ; c = actual x position
-    
-    ld h, CMP_PHYSICS_H
-    ld a, [hl]           ; a = initial x position
-    ld h, CMP_SPRITE_H
-    
-    sub 8                               ; a = min x position
-    cp c
-    jr z, .change_direction_to_right    ; At min x, go right
-
-    add 24                              ; a = max x position
-    cp c
-    jr z, .change_direction_to_left     ; At max x, go left
-
-    ld h, CMP_PHYSICS_H
-    dec l
-    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
-    push af
-    inc l
-    pop af
-    jr z, .move_right
-    .move_left:
-        call move_entity_left
-        ret
-
-    .move_right:
-        call move_entity_right
-        ret
-
-    .change_direction_to_right:
-        push hl
-        inc l
-        call flip_sprite_horizontally
-        pop hl
-        ld h, CMP_PHYSICS_H
-        dec l
-        res 0, [hl]
-        inc l
-        ld h, CMP_SPRITE_H
-        jr .move_right
-
-    .change_direction_to_left:
-        push hl
-        inc l
-        call flip_sprite_horizontally
-        pop hl
-        ld h, CMP_PHYSICS_H
-        dec l
-        set 0, [hl]
-        inc l
-        ld h, CMP_SPRITE_H
-        jr .move_left
-ret
-
 ; OVNI ANIMATION
 ;
 ; Input
@@ -415,7 +314,7 @@ ret
 animate_object::
     ld hl, OBJECT_INFO_ADDR
     ld a, [hl]
-    cp CMP_RESERVED
+    cp CMP_RESERVED_OBJECT
     ret nz
 
     ld h, CMP_SPRITE_H

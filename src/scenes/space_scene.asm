@@ -50,7 +50,6 @@ space_scene_run::
     call move ; Uses b
     call animate ; Uses b
     call enemies_movement
-    call animate_object
 jr space_scene_run
 
 ; Copy entities sprites to OAM

@@ -2,11 +2,15 @@ include "constants.inc"
 
 section "Time Interruption", ROM0[$0050] ; Don't change this section
 
-time_interruption_handler::
+time_interruption_handler::   
     push af
     push hl
     push bc
     push de
+    
+    call enemies_animation
+    call animate_object
+    
     ld hl, internal_ui_clock
     ld a, [hl]
     inc a

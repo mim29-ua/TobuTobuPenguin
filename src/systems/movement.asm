@@ -337,7 +337,7 @@ enemies_movement::
         bit CMP_BIT_ENEMY, a
         jr z, .continue        ; Next iteration, if the position is free
 
-        call check_enemy_type
+        call check_enemy_type_movement
         jr .loop
 
         .continue:              ; Next info component
@@ -345,6 +345,166 @@ enemies_movement::
             add SIZEOF_INFO_CMP
             ld l, a
     jr .loop
+ret
+
+check_enemy_type_movement::
+    ld h, CMP_SPRITE_H
+    ld a, l
+    add CMP_SPRI_L_TILE
+    ld l, a
+
+    ld a, [hl]
+
+    cp WINDMILL_INITIAL_TILE
+    jr nc, .continue
+
+    cp OWL_INITIAL_TILE
+    jr nc, .continue
+
+    cp OVNI_INITIAL_TILE
+    jr nc, .continue
+    
+    cp GHOST_INITIAL_TILE
+    jr nc, .ghost_animation
+
+    cp AIRSHIP_INITIAL_TILE
+    jp nc, .airship_movement
+
+    .ghost_animation:
+        ld b, GHOST_INITIAL_TILE + 2
+        dec l
+        call ghost_movement
+        inc l
+    jr .continue
+
+    .airship_movement:
+        dec l
+        call airship_movement
+        inc l
+    jr .continue
+
+    .continue:
+        ld h, CMP_INFO_H
+        ld a, l
+        add SIZEOF_INFO_CMP - CMP_SPRI_L_TILE
+        ld l, a
+ret
+
+; Input
+; hl -> enemy x address
+airship_movement::
+
+    ld d, CMP_INFO_H
+    ld e, l
+    dec de               ; de = enemy info component address
+
+    ld a, [hl]
+    cp LEFT_WALL_PIXEL
+    jr z, .change_direction_to_right
+    cp RIGHT_WALL_PIXEL
+    jr z, .change_direction_to_left
+
+    ld h, CMP_PHYSICS_H
+    dec l
+    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
+    push af
+    inc l
+    pop af
+    jr z, .move_right
+    .move_left:
+        call move_entity_left
+        ret
+
+    .move_right:
+        call move_entity_right
+        ret
+
+    .change_direction_to_right:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
+        ld h, CMP_PHYSICS_H
+        dec l
+        res 0, [hl]
+        inc l
+        ld h, CMP_SPRITE_H
+        jr .move_right
+
+    .change_direction_to_left:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
+        ld h, CMP_PHYSICS_H
+        dec l
+        set 0, [hl]
+        inc l
+        ld h, CMP_SPRITE_H
+        jr .move_left
+ret
+
+; Input
+; hl -> enemy x address
+ghost_movement::
+
+    ld d, CMP_INFO_H
+    ld e, l
+    dec de               ; de = enemy info component address
+
+    ld a, [hl]
+    ld c, a              ; c = actual x position
+    
+    ld h, CMP_PHYSICS_H
+    ld a, [hl]           ; a = initial x position
+    ld h, CMP_SPRITE_H
+    
+    sub 8                               ; a = min x position
+    cp c
+    jr z, .change_direction_to_right    ; At min x, go right
+
+    add 24                              ; a = max x position
+    cp c
+    jr z, .change_direction_to_left     ; At max x, go left
+
+    ld h, CMP_PHYSICS_H
+    dec l
+    bit 0, [hl]                         ; 0 = moving right - 1 = moving left
+    push af
+    inc l
+    pop af
+    jr z, .move_right
+    .move_left:
+        call move_entity_left
+        ret
+
+    .move_right:
+        call move_entity_right
+        ret
+
+    .change_direction_to_right:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
+        ld h, CMP_PHYSICS_H
+        dec l
+        res 0, [hl]
+        inc l
+        ld h, CMP_SPRITE_H
+        jr .move_right
+
+    .change_direction_to_left:
+        push hl
+        inc l
+        call flip_sprite_horizontally
+        pop hl
+        ld h, CMP_PHYSICS_H
+        dec l
+        set 0, [hl]
+        inc l
+        ld h, CMP_SPRITE_H
+        jr .move_left
 ret
 
 ;; ---------------------------------------------------
